@@ -1,0 +1,66 @@
+'use strict';
+
+import { existsSync } from 'fs';
+import * as path from 'path';
+import { commands, ExtensionContext, Position, QuickPickItem, TextDocument, TextEditor, TextEditorEdit, Uri, window, workspace } from 'vscode';
+import { FormattingOptions, LanguageClient, WorkspaceEdit, CreateFile, RenameFile, DeleteFile, TextDocumentEdit, CodeActionParams, SymbolInformation, TextDocumentPositionParams } from 'vscode-languageclient';
+import { Commands, Commands as javaCommands } from './commands';
+import {   GetInlineNonTerminalRefactorRequest, GetMakeEmptyRefactorRequest, GetMakeLeftRecursiveRefactorRequest, GetNonEmptyRefactorRequest, RefactorWorkspaceEdit} from './protocol';
+
+export function registerCommands(languageClient: LanguageClient, context: ExtensionContext) {
+    registerApplyRefactorCommand(languageClient, context);
+}
+
+async function applyRefactorEdit(languageClient: LanguageClient, refactorEdit: RefactorWorkspaceEdit) {
+    if (!refactorEdit) {
+        return;
+    }
+
+    if (refactorEdit.errorMessage) {
+        window.showErrorMessage(refactorEdit.errorMessage);
+        return;
+    }
+
+    if (refactorEdit.edit) {
+        const edit = languageClient.protocol2CodeConverter.asWorkspaceEdit(refactorEdit.edit);
+        if (edit) {
+            await workspace.applyEdit(edit);
+        }
+    }
+
+    if (refactorEdit.command) {
+        await new Promise(resolve => setTimeout(resolve, 400));
+        if (refactorEdit.command.arguments) {
+            await commands.executeCommand(refactorEdit.command.command, ...refactorEdit.command.arguments);
+        } else {
+            await commands.executeCommand(refactorEdit.command.command);
+        }
+    }
+}
+function getTextDocumentPositionParams(): TextDocumentPositionParams{
+    const params: TextDocumentPositionParams = {
+        textDocument: {
+            uri: window.activeTextEditor.document.uri.toString(),
+        },
+        position: this.languageClient.code2ProtocolConverter.asPosition(window.activeTextEditor.selection.active),
+    };
+    return params;
+}
+function registerApplyRefactorCommand(languageClient: LanguageClient, context: ExtensionContext): void {
+    context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_NON_EMPTY,async () =>{
+            const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetNonEmptyRefactorRequest.type,getTextDocumentPositionParams());
+            applyRefactorEdit(languageClient,result);
+	}));
+    context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_EMPTY,async () =>{
+        const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetMakeEmptyRefactorRequest.type,getTextDocumentPositionParams());
+        applyRefactorEdit(languageClient,result);
+    }));
+    context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_LEFT_RECURSIVE,async () =>{
+        const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetMakeLeftRecursiveRefactorRequest.type,getTextDocumentPositionParams());
+        applyRefactorEdit(languageClient,result);
+}));
+context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_INLINE_NONT_TERMINAL,async () =>{
+    const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetInlineNonTerminalRefactorRequest.type,getTextDocumentPositionParams());
+    applyRefactorEdit(languageClient,result);
+}));
+}

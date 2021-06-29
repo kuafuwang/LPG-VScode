@@ -7,7 +7,6 @@
 	"categories": [],
 	"description": "Language server for lpg2",
 	"homepage": "https://github.com/kuafuwang/LPG-VScode/blob/master/README.md",
-	"icon": "AntlrVSIX_large.png",
 	"keywords": [
 	  "LPG",
 	  "lpg"
@@ -38,6 +37,72 @@
 		}
 		
 	  ],
+	  "commands": [
+		{
+			"command": "antlr.atn.singleRule",
+			"title": "Show ATN Graph for Rule"
+		},
+		{
+			"command": "antlr.rrd.singleRule",
+			"title": "Show Railroad Diagram for Rule"
+		},
+		{
+			"command": "antlr.rrd.allRules",
+			"title": "Show Railroad Diagram for all Rules"
+		},
+		{
+			"command": "lpg.call-graph",
+			"title": "Show Grammar Call Graph"
+		},
+		{
+			"command": "antlr.tools.generateSentences",
+			"title": "Generate valid input for Rule"
+		}
+	],
+	"menus": {
+		"explorer/context": [],
+		"editor/title/context": [
+			{
+				"when": "resourceLangId == lpg2",
+				"command": "antlr.rrd.allRules",
+				"group": "antlr@1"
+			}
+		],
+		"editor/title": [
+			{
+				"when": "resourceLangId == lpg2",
+				"command": "antlr.rrd.allRules",
+				"group": "antlr@1"
+			}
+		],
+		"editor/context": [
+			{
+				"when": "resourceLangId == lpg2",
+				"command": "antlr.rrd.singleRule",
+				"group": "antlr@1"
+			},
+			{
+				"when": "resourceLangId == lpg2",
+				"command": "antlr.rrd.allRules",
+				"group": "antlr@2"
+			},
+			{
+				"when": "resourceLangId == lpg2",
+				"command": "antlr.atn.singleRule",
+				"group": "antlr@3"
+			},
+			{
+				"when": "resourceLangId == lpg2",
+				"command": "antlr.call-graph",
+				"group": "antlr@4"
+			},
+			{
+				"when": "resourceLangId == lpg2",
+				"command": "antlr.tools.generateSentences",
+				"group": "antlr@5"
+			}
+		]
+	},
 	  "configuration": {
 		"type": "object",
 		"title": "Example configuration",
@@ -67,15 +132,21 @@
 	  "compile": "tsc -p ./"
 	},
 	"dependencies": {
+		"d3": "^6.6.2",
+		"fs-extra": "^9.0.1",
 	  "abort-controller": "3.0.0",
 	  "jsonc-parser": "2.3.0",
 	  "vscode-jsonrpc": "^6.0.0-next.5",
-	  "vscode-languageclient": "^7.0.0-next.9",
 	  "vscode-languageserver": "^7.0.0-next.7",
 	  "vscode-languageserver-protocol": "^3.16.0-next.7",
-	  "vscode-languageserver-types": "^3.16.0-next.3"
+	  "vscode-languageserver-types": "^3.16.0-next.3",
+	  "vscode-languageclient": "6.0.0-next.9",
+	  "winston": "^3.2.1",
+	  "winston-daily-rotate-file": "^3.10.0"
 	},
 	"devDependencies": {
+		"@types/d3": "^6.3.0",
+	  "@types/fs-extra": "^9.0.10",
 	  "@types/glob": "^7.1.3",
 	  "@types/mocha": "^8.0.3",
 	  "@types/node": "^14.6.2",
