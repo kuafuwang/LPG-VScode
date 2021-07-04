@@ -217,3 +217,8 @@ export class Utils {
     }
 
 }
+// ！！！ 使用 is 来确认参数 s 是一个 string 类型
+export function isString(s :unknown): s is string {
+    return typeof s === 'string';
+  }
+   

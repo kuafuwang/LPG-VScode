@@ -1,189 +1,146 @@
 {
-	"name": "LPG-vscode",
 	"author": "kuafuwang",
+	"name": "lpg",
 	"bugs": {
-	  "url": "https://github.com/kuafuwang/LPG-VScode/issues"
+		"url": "https://github.com/kuafuwang/LPG-VScode/issues"
 	},
 	"categories": [],
 	"description": "Language server for lpg2",
 	"homepage": "https://github.com/kuafuwang/LPG-VScode/blob/master/README.md",
 	"keywords": [
-	  "LPG",
-	  "lpg"
+		"LPG",
+		"lpg"
 	],
 	"license": "MIT",
 	"publisher": "kuafuwang",
 	"repository": {
-	  "type": "git",
-	  "url": "https://github.com/kuafuwang/LPG-VScode"
+		"type": "git",
+		"url": "https://github.com/kuafuwang/LPG-VScode"
 	},
 	"version": "0.0.1",
 	"engines": {
-	  "vscode": "^1.48.0"
+		"vscode": "^1.48.0"
 	},
 	"activationEvents": [
-	  "onLanguage:lpg2"
+		"onLanguage:lpg2"
 	],
 	"main": "./out/extension",
 	"contributes": {
-	  "languages": [
-		{
-		  "id": "lpg2",
-		  "extensions": [
-			".g",
-			".gi",
-			".lpg2"
-		  ]
-		}
-		
-	  ],
-	  "commands": [
-		{
-			"command": "antlr.atn.singleRule",
-			"title": "Show ATN Graph for Rule"
-		},
-		{
-			"command": "antlr.rrd.singleRule",
-			"title": "Show Railroad Diagram for Rule"
-		},
-		{
-			"command": "antlr.rrd.allRules",
-			"title": "Show Railroad Diagram for all Rules"
-		},
-		{
-			"command": "lpg.call-graph",
-			"title": "Show Grammar Call Graph"
-		},
-		{
-			"command": "antlr.tools.generateSentences",
-			"title": "Generate valid input for Rule"
-		}
-	],
-	"menus": {
-		"explorer/context": [],
-		"editor/title/context": [
+		"languages": [
 			{
-				"when": "resourceLangId == lpg2",
-				"command": "antlr.rrd.allRules",
-				"group": "antlr@1"
+				"id": "lpg2",
+				"extensions": [
+					".g",
+					".gi",
+					".lpg2"
+				]
 			}
 		],
-		"editor/title": [
+		"commands": [
 			{
-				"when": "resourceLangId == lpg2",
-				"command": "antlr.rrd.allRules",
-				"group": "antlr@1"
+				"command": "lpg.call-graph",
+				"title": "Show Grammar Call Graph"
+			},
+			{
+				"command": "lpg.inlineNonTerminal",
+				"title": "Inline Non-Terminal"
+			},
+			{
+				"command": "lpg.MakeLeftRecursive",
+				"title": "Make Left Recursive"
+			},
+			{
+				"command": "lpg.makeEmpty",
+				"title": "Make Empty"
+			},
+			{
+				"command": "lpg.MakeNonEmpty",
+				"title": "Make Non-Empty"
 			}
 		],
-		"editor/context": [
-			{
-				"when": "resourceLangId == lpg2",
-				"command": "antlr.rrd.singleRule",
-				"group": "antlr@1"
-			},
-			{
-				"when": "resourceLangId == lpg2",
-				"command": "antlr.rrd.allRules",
-				"group": "antlr@2"
-			},
-			{
-				"when": "resourceLangId == lpg2",
-				"command": "antlr.atn.singleRule",
-				"group": "antlr@3"
-			},
-			{
-				"when": "resourceLangId == lpg2",
-				"command": "antlr.call-graph",
-				"group": "antlr@4"
-			},
-			{
-				"when": "resourceLangId == lpg2",
-				"command": "antlr.tools.generateSentences",
-				"group": "antlr@5"
+		"menus": {
+			"editor/context": [
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.call-graph",
+					"group": "lpg2@1"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.inlineNonTerminal",
+					"group": "lpg2@1"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.MakeLeftRecursive",
+					"group": "lpg2@1"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.makeEmpty",
+					"group": "lpg2@2"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.MakeNonEmpty",
+					"group": "lpg2@3"
+				}
+			]
+		},
+		"configuration": {
+			"type": "object",
+			"title": "Example configuration",
+			"properties": {
+				"languageServerExample.maxNumberOfProblems": {
+					"scope": "resource",
+					"type": "number",
+					"default": 10000,
+					"description": "Controls the maximum number of problems produced by the server."
+				},
+				"languageServerExample.trace.server": {
+					"scope": "window",
+					"type": "string",
+					"enum": [
+						"off",
+						"messages",
+						"verbose"
+					],
+					"default": "off",
+					"description": "Traces the communication between VS Code and the language server."
+				}
 			}
-		]
-	},
-	  "configuration": {
-		"type": "object",
-		"title": "Example configuration",
-		"properties": {
-		  "languageServerExample.maxNumberOfProblems": {
-			"scope": "resource",
-			"type": "number",
-			"default": 10000,
-			"description": "Controls the maximum number of problems produced by the server."
-		  },
-		  "languageServerExample.trace.server": {
-			"scope": "window",
-			"type": "string",
-			"enum": [
-			  "off",
-			  "messages",
-			  "verbose"
-			],
-			"default": "off",
-			"description": "Traces the communication between VS Code and the language server."
-		  }
 		}
-	  }
 	},
 	"scripts": {
-	  "vscode:prepublish": "npm install",
-	  "compile": "tsc -p ./"
+		"vscode:prepublish": "npm install",
+		"compile": "tsc -p ./"
 	},
 	"dependencies": {
-		"d3": "^6.6.2",
 		"fs-extra": "^9.0.1",
-	  "abort-controller": "3.0.0",
-	  "jsonc-parser": "2.3.0",
-	  "vscode-jsonrpc": "^6.0.0-next.5",
-	  "vscode-languageserver": "^7.0.0-next.7",
-	  "vscode-languageserver-protocol": "^3.16.0-next.7",
-	  "vscode-languageserver-types": "^3.16.0-next.3",
-	  "vscode-languageclient": "6.0.0-next.9",
-	  "winston": "^3.2.1",
-	  "winston-daily-rotate-file": "^3.10.0"
+	
+		"abort-controller": "3.0.0",
+		"vscode-languageclient": "7.0.0-next.9",
+		"winston": "^3.2.1",
+		"winston-daily-rotate-file": "^3.10.0"
+
 	},
 	"devDependencies": {
-		"@types/d3": "^6.3.0",
-	  "@types/fs-extra": "^9.0.10",
-	  "@types/glob": "^7.1.3",
-	  "@types/mocha": "^8.0.3",
-	  "@types/node": "^14.6.2",
-	  "@types/vscode": "1.48.0",
-	  "glob": "^7.1.4",
-	  "mocha": "^7.1.0",
-	  "tslint": "^5.16.0",
-	  "typescript": "^3.8.3",
-	  "vsce": "^1.75.0",
-	  "vscode-test": "^1.3.0"
-	},
-	"configuration": {
-	  "type": "object",
-	  "title": "server configuration",
-	  "properties": {
-		"antlr.path": {
-		  "type": "string",
-		  "default": "antlr",
-		  "description": "The path to server executable"
-		},
-		"antlr.arguments": {
-		  "type": "array",
-		  "default": [],
-		  "items": {
-			"type": "string"
-		  },
-		  "description": "Arguments for server"
-		},
-		"antlr.syncFileEvents": {
-		  "type": "boolean",
-		  "default": true,
-		  "description": "Whether or not to send file events to server (File created, changed or deleted). This can be disabled for performance consideration."
-		},
-		"antlr.trace": {
-		  "type": "string",
-		  "description": "Names a file that server should log a performance trace to, in chrome trace-viewer JSON format."
-		}
-	  }
+		
+		"@types/expect": "^24.3.0",
+		"@types/fs-extra": "^9.0.10",
+		"@types/glob": "^7.1.3",
+		"@types/lodash": "^4.14.168",
+		"@types/mocha": "^8.2.2",
+		"@types/node": "^14.14.37",
+		"@types/vscode": "1.55.0",
+		"glob": "^7.1.4",
+		"mocha": "^7.1.0",
+		"tslint": "^5.16.0",
+		"typescript": "^3.8.3",
+		"vsce": "^1.75.0",
+		"vscode-test": "^1.3.0",
+		"@types/lodash.findindex": "^4.6.6",
+		"lodash.findindex": "^4.6.0",
+		"lodash.template": ">=4.5.0"
 	}
-  }
+}

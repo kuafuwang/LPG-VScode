@@ -66,15 +66,15 @@ export namespace ActionableNotification {
 }
 
 export namespace GetNonEmptyRefactorRequest {
-    export const type = new RequestType<TextDocumentPositionParams, RefactorWorkspaceEdit, void>('lpg/MakeNonEmpty');
+    export const type = new RequestType<TextDocumentPositionParams,RefactorWorkspaceEdit, void>('lpg/MakeNonEmpty');
 }
 
 export namespace GetMakeEmptyRefactorRequest {
-    export const type = new RequestType<TextDocumentPositionParams, RefactorWorkspaceEdit, void>('lpg/makeEmpty');
+    export const type = new RequestType<TextDocumentPositionParams,RefactorWorkspaceEdit,  void>('lpg/makeEmpty');
 }
 export namespace GetMakeLeftRecursiveRefactorRequest {
-    export const type = new RequestType<TextDocumentPositionParams, RefactorWorkspaceEdit, void>('lpg/MakeLeftRecursive');
+    export const type = new RequestType<TextDocumentPositionParams,RefactorWorkspaceEdit,  void>('lpg/MakeLeftRecursive');
 }
 export namespace GetInlineNonTerminalRefactorRequest {
-    export const type = new RequestType<TextDocumentPositionParams, RefactorWorkspaceEdit, void>('lpg/inlineNonTerminal');
+    export const type = new RequestType<TextDocumentPositionParams,RefactorWorkspaceEdit,  void>('lpg/inlineNonTerminal');
 }

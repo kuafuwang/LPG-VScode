@@ -3,10 +3,10 @@
 import { existsSync } from 'fs';
 import * as path from 'path';
 import { commands, ExtensionContext, Position, QuickPickItem, TextDocument, TextEditor, TextEditorEdit, Uri, window, workspace } from 'vscode';
-import { FormattingOptions, LanguageClient, WorkspaceEdit, CreateFile, RenameFile, DeleteFile, TextDocumentEdit, CodeActionParams, SymbolInformation, TextDocumentPositionParams } from 'vscode-languageclient';
+import { FormattingOptions,  WorkspaceEdit, CreateFile, RenameFile, DeleteFile, TextDocumentEdit, CodeActionParams, SymbolInformation, TextDocumentPositionParams } from 'vscode-languageclient';
 import { Commands, Commands as javaCommands } from './commands';
 import {   GetInlineNonTerminalRefactorRequest, GetMakeEmptyRefactorRequest, GetMakeLeftRecursiveRefactorRequest, GetNonEmptyRefactorRequest, RefactorWorkspaceEdit} from './protocol';
-
+import { LanguageClient } from 'vscode-languageclient/node';
 export function registerCommands(languageClient: LanguageClient, context: ExtensionContext) {
     registerApplyRefactorCommand(languageClient, context);
 }
@@ -37,30 +37,38 @@ async function applyRefactorEdit(languageClient: LanguageClient, refactorEdit: R
         }
     }
 }
-function getTextDocumentPositionParams(): TextDocumentPositionParams{
+function getTextDocumentPositionParams(languageClient: LanguageClient,): TextDocumentPositionParams | undefined {
+    if(! window.activeTextEditor){
+        return undefined;
+    }
+    let activeTextEditor:  TextEditor = window.activeTextEditor;
     const params: TextDocumentPositionParams = {
+       
         textDocument: {
-            uri: window.activeTextEditor.document.uri.toString(),
+            uri: activeTextEditor.document.uri.toString(),
         },
-        position: this.languageClient.code2ProtocolConverter.asPosition(window.activeTextEditor.selection.active),
+        position: languageClient.code2ProtocolConverter.asPosition(activeTextEditor.selection.active),
     };
     return params;
 }
 function registerApplyRefactorCommand(languageClient: LanguageClient, context: ExtensionContext): void {
     context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_NON_EMPTY,async () =>{
-            const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetNonEmptyRefactorRequest.type,getTextDocumentPositionParams());
+
+            const result: RefactorWorkspaceEdit = await languageClient.sendRequest(
+                GetNonEmptyRefactorRequest.type,getTextDocumentPositionParams(languageClient));
             applyRefactorEdit(languageClient,result);
+            
 	}));
     context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_EMPTY,async () =>{
-        const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetMakeEmptyRefactorRequest.type,getTextDocumentPositionParams());
+        const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetMakeEmptyRefactorRequest.type,getTextDocumentPositionParams(languageClient));
         applyRefactorEdit(languageClient,result);
     }));
     context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_LEFT_RECURSIVE,async () =>{
-        const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetMakeLeftRecursiveRefactorRequest.type,getTextDocumentPositionParams());
+        const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetMakeLeftRecursiveRefactorRequest.type,getTextDocumentPositionParams(languageClient));
         applyRefactorEdit(languageClient,result);
 }));
 context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_INLINE_NONT_TERMINAL,async () =>{
-    const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetInlineNonTerminalRefactorRequest.type,getTextDocumentPositionParams());
+    const result: RefactorWorkspaceEdit = await languageClient.sendRequest(GetInlineNonTerminalRefactorRequest.type,getTextDocumentPositionParams(languageClient));
     applyRefactorEdit(languageClient,result);
 }));
 }

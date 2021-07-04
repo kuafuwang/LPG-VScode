@@ -43,7 +43,8 @@ function organizeTasks() {
 }
 
 function recycleTasks(tasks: ProgressReport[], length: number) {
-	const newArray = [], delta = tasks.length - length;
+	const newArray :ProgressReport[] = [];
+	const delta = tasks.length - length;
 	let skipped = 0;
 
 	tasks.forEach(task => {
@@ -59,7 +60,7 @@ function recycleTasks(tasks: ProgressReport[], length: number) {
 }
 
 function applyReport(report: ProgressReport) {
-	const index = findIndex(tasks, task => task.id === report.id);
+	const index = findIndex(tasks,( task : ProgressReport) => task.id === report.id);
 	if (index === -1) {
 		tasks.push(report);
 	} else {

@@ -4,39 +4,39 @@ import * as path from 'path';
 import * as os from 'os'
 import * as fs from 'fs';
 import glob = require('glob');
-import { ExtensionContext, languages, DocumentSymbolProvider, TextDocument, 
-    SymbolInformation, DocumentSymbol, TextDocumentContentProvider, workspace, Uri, Event, HoverProvider, 
-    Position, Hover,window,commands, ViewColumn, OutputChannel, TextEditorEdit, TextEditor, Selection } from "vscode";
+import {     
+       workspace, Uri,   
+    Position, window,commands, ViewColumn, OutputChannel,
+	 Selection } from "vscode";
 
-import { ExecuteCommandParams, ExecuteCommandRequest, LanguageClient, 
+import {  
         LanguageClientOptions, RevealOutputChannelOn,
         ErrorHandler, Message, ErrorAction, CloseAction,
-         DidChangeConfigurationNotification, CancellationToken, StreamInfo, ServerOptions, Executable, MessageType, TextDocumentPositionParams } from 'vscode-languageclient';
+           
+		    MessageType,
+			WorkspaceEdit,
+			Command,
+		
+		  } from 'vscode-languageclient';
+
+import { LanguageClient, ServerOptions, StreamInfo } from 'vscode-languageclient/node';
 
 import { logger, initializeLogFile } from './log';
 
 import { Commands } from './commands';
-import { deleteDirectory } from './utils';
-import { ActionableNotification, ProgressReportNotification } from './protocol';
+import { deleteDirectory, isString } from './utils';
+import { ActionableMessage, ActionableNotification, ProgressReport, ProgressReportNotification } from './protocol';
 import { serverTasks } from './serverTasks';
 import * as refactorAction from './refactorAction';
-import { LpgCallGraphProvider } from './CallGraphProvider';
-import { LpgRailroadDiagramProvider } from './RailroadDiagramProvider';
-/**
- * Method to get workspace configuration option
- * @param option name of the option (e.g. for antlr.path should be path)
- * @param defaultValue default value to return if option is not set
- */
-function getConfig<T>(option: string, defaultValue?: any): T
-{
-    const config = vscode.workspace.getConfiguration('antlr');
-    return config.get<T>(option, defaultValue);
-}
+import { TextEditor } from 'vscode';
 
-var languageClient: LanguageClient  | undefined = undefined;
+
+
+
+var languageClient: LanguageClient ;
 const cleanWorkspaceFileName = '.cleanWorkspace';
 const extensionName = 'Language Support for LPG';
-let clientLogFile : string | undefined;
+let clientLogFile : string;
 
 class FileStatus
 {
@@ -183,7 +183,7 @@ export class ClientErrorHandler implements ErrorHandler {
 }
 
 export class OutputInfoCollector implements OutputChannel {
-	private channel: OutputChannel = null;
+	private channel: OutputChannel ;
 
 	constructor(public name: string) {
 		this.channel = window.createOutputChannel(this.name);
@@ -217,25 +217,28 @@ export class OutputInfoCollector implements OutputChannel {
 		this.channel.dispose();
 	}
 }
-function logNotification(message: string) {
-	return new Promise(() => {
+function logNotification(message: string) : Promise<string | undefined>{
+	return new Promise( () => {
 		logger.verbose(message);
 	});
 }
-async function executeRangeFormat(editor, startPosition, lineOffset) {
+async function executeRangeFormat(editor : TextEditor, startPosition:Position, lineOffset : number) {
 	const endPosition = editor.document.positionAt(editor.document.offsetAt(new Position(startPosition.line + lineOffset + 1, 0)) - 1);
 	editor.selection = new Selection(startPosition, endPosition);
 	await commands.executeCommand('editor.action.formatSelection');
 }
 
-export async function applyWorkspaceEdit(obj, languageClient) {
+export async function applyWorkspaceEdit(obj :WorkspaceEdit, languageClient : LanguageClient) {
 	const edit = languageClient.protocol2CodeConverter.asWorkspaceEdit(obj);
 	if (edit) {
 		await workspace.applyEdit(edit);
 		// By executing the range formatting command to correct the indention according to the VS Code editor settings.
 		// More details, see: https://github.com/redhat-developer/vscode-java/issues/557
 		try {
-			const currentEditor = window.activeTextEditor;
+			if(!window.activeTextEditor){
+				return;
+			}
+			const currentEditor : TextEditor = window.activeTextEditor;
 			// If the Uri path of the edit change is not equal to that of the active editor, we will skip the range formatting
 			if (currentEditor.document.uri.fsPath !== edit.entries()[0][0].fsPath) {
 				return;
@@ -259,7 +262,11 @@ export async function applyWorkspaceEdit(obj, languageClient) {
 			// Recover the cursor's original position
 			currentEditor.selection = new Selection(cursorPostion, cursorPostion);
 		} catch (error) {
-			languageClient.error(error);
+			if( isString(error))
+				languageClient.error(error);
+			else{
+				logger.error(error);
+			}
 		}
 	}
 }
@@ -283,44 +290,7 @@ export function activate(context: vscode.ExtensionContext)
             window.showErrorMessage(`Failed to delete ${workspacePath}: ${error}`);
         }
     }
-    // Register commands here to make it available even when the language client fails
-    context.subscriptions.push(commands.registerCommand(Commands.OPEN_SERVER_LOG, (column: ViewColumn) => openServerLogFile(workspacePath, column)));
-
-    context.subscriptions.push(commands.registerCommand(Commands.OPEN_CLIENT_LOG, (column: ViewColumn) => openClientLogFile(clientLogFile, column)));
-
-    context.subscriptions.push(commands.registerCommand(Commands.OPEN_LOGS, () => openLogs()));
-	refactorAction.registerCommands(this.languageClient, context);
-	 // The call graph command.
-	 const callGraphProvider = new LpgCallGraphProvider(context);
-	 context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_CALL_GRAPH,
-		 (textEditor: TextEditor, edit: TextEditorEdit) => {
-			 callGraphProvider.showWebview(textEditor, {
-				 title: "Call Graph: " + path.basename(textEditor.document.fileName),
-			 });
-		 }),
-	 );
-
-	 const diagramProvider = new LpgRailroadDiagramProvider(context);
-
-	 // The single RRD diagram command.
-	 context.subscriptions.push(commands.registerTextEditorCommand("lpg.rrd.singleRule",
-		 (textEditor: TextEditor, edit: TextEditorEdit) => {
-			 diagramProvider.showWebview(textEditor, {
-				 title: "RRD: " + path.basename(textEditor.document.fileName),
-				 fullList: false,
-			 });
-		 }),
-	 );
  
-	 // The full RRD diagram command.
-	 context.subscriptions.push(commands.registerTextEditorCommand("lpg.rrd.allRules",
-		 (textEditor: TextEditor, edit: TextEditorEdit) => {
-			 diagramProvider.showWebview(textEditor, {
-				 title: "RRD: " + path.basename(textEditor.document.fileName),
-				 fullList: true,
-			 });
-		 }),
-	 );
 /*
     var fn = __dirname + '/../Server/lpgServer.exe';
     let server: Executable =
@@ -359,43 +329,58 @@ export function activate(context: vscode.ExtensionContext)
     console.log('LPG Language Server start active!');
     languageClient = new LanguageClient('LPG Language Server', serverOptions, clientOptions);
 
-    languageClient.registerProposedFeatures();
-	this.languageClient.onNotification(ProgressReportNotification.type, (progress) => {
-		serverTasks.updateServerTask(progress);
-	});
-	this.languageClient.onNotification(ActionableNotification.type, (notification) => {
-		let show = null;
-		switch (notification.severity) {
-			case MessageType.Log:
-				show = logNotification;
-				break;
-			case MessageType.Info:
-				show = window.showInformationMessage;
-				break;
-			case MessageType.Warning:
-				show = window.showWarningMessage;
-				break;
-			case MessageType.Error:
-				show = window.showErrorMessage;
-				break;
-		}
-		if (!show) {
-			return;
-		}
-		const titles = notification.commands.map(a => a.title);
-		show(notification.message, ...titles).then((selection) => {
-			for (const action of notification.commands) {
-				if (action.title === selection) {
-					const args: any[] = (action.arguments) ? action.arguments : [];
-					commands.executeCommand(action.command, ...args);
+   // Register commands here to make it available even when the language client fails
+   context.subscriptions.push(commands.registerCommand(Commands.OPEN_SERVER_LOG, (column: ViewColumn) => openServerLogFile(workspacePath, column)));
+
+   context.subscriptions.push(commands.registerCommand(Commands.OPEN_CLIENT_LOG, (column: ViewColumn) => openClientLogFile(clientLogFile, column)));
+
+   context.subscriptions.push(commands.registerCommand(Commands.OPEN_LOGS, () => openLogs()));
+   refactorAction.registerCommands(languageClient, context);
+
+
+	languageClient.onReady().then(() => {
+		languageClient.onNotification(ProgressReportNotification.type, (progress : ProgressReport) => {
+			serverTasks.updateServerTask(progress);
+		});
+		languageClient.onNotification(ActionableNotification.type, (notification : ActionableMessage) => {
+			let show = null;
+			switch (notification.severity) {
+				case MessageType.Log:
+					show =logNotification;
 					break;
-				}
+				case MessageType.Info:
+					show = window.showInformationMessage;
+					break;
+				case MessageType.Warning:
+					show = window.showWarningMessage;
+					break;
+				case MessageType.Error:
+					show = window.showErrorMessage;
+					break;
 			}
+			if (!show) {
+				return;
+			}
+			if(!notification.commands)return;
+			
+			let notification_commands : Command[]  = notification.commands;
+			let titles : string[] = notification_commands.map(a => a.title);
+
+			show(notification.message, ...titles).then( (selection :string| undefined) => {
+				for (const action of notification_commands) {
+					if (action.title === selection) {
+						const args: any[] = (action.arguments) ? action.arguments : [];
+						commands.executeCommand(action.command, ...args);
+						break;
+					}
+				}
+			
+			});
 		});
 	});
-
-    console.log('LPG Language Server is now active!');
-    languageClient.start();
+   languageClient.registerProposedFeatures();
+   languageClient.start();
+   console.log('LPG Language Server is now active!');
 }
 
 export function deactivate(): Thenable<void> | undefined
