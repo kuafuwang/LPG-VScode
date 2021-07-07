@@ -1,7 +1,9 @@
 'use strict';
 import * as fs from "fs-extra";
 import * as path from 'path';
+import { TextEditor } from "vscode";
 import { workspace, WorkspaceConfiguration, TextDocument, ExtensionContext, Uri, window, Webview } from 'vscode';
+import { LanguageClient, TextDocumentPositionParams } from "vscode-languageclient/node";
 
 export function getJavaConfiguration(): WorkspaceConfiguration {
 	return workspace.getConfiguration('java');
@@ -222,3 +224,17 @@ export function isString(s :unknown): s is string {
     return typeof s === 'string';
   }
    
+  export function getTextDocumentPositionParams(languageClient: LanguageClient,): TextDocumentPositionParams | undefined {
+    if(! window.activeTextEditor){
+        return undefined;
+    }
+    let activeTextEditor:  TextEditor = window.activeTextEditor;
+    const params: TextDocumentPositionParams = {
+       
+        textDocument: {
+            uri: activeTextEditor.document.uri.toString(),
+        },
+        position: languageClient.code2ProtocolConverter.asPosition(activeTextEditor.selection.active),
+    };
+    return params;
+}

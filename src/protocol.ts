@@ -1,4 +1,5 @@
 'use strict';
+import { Uri } from 'vscode';
 import {
     CodeActionParams,
     Command,
@@ -31,6 +32,7 @@ export interface ProgressReport {
 	complete: boolean;
 }
 export interface ReferenceNodeInfo {
+    name : string;
     rules: Array<string>;
     terminal: Array<string>;
 
@@ -77,4 +79,7 @@ export namespace GetMakeLeftRecursiveRefactorRequest {
 }
 export namespace GetInlineNonTerminalRefactorRequest {
     export const type = new RequestType<TextDocumentPositionParams,RefactorWorkspaceEdit,  void>('lpg/inlineNonTerminal');
+}
+export namespace CallGraphRequest {
+    export const type = new RequestType<TextDocumentPositionParams,Array<ReferenceNodeInfo>,  void>('lpg/call-graph');
 }

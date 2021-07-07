@@ -50,7 +50,7 @@ export class LpgRailroadDiagramProvider extends WebviewProvider {
                     </span>
                 </div>
                 <div id="container">`;
-                
+              /*  
             const symbols = this.backend.listTopLevelSymbols(fileName, false);
             for (const symbol of symbols) {
                 if (symbol.kind === SymbolKind.LexerRule
@@ -59,12 +59,12 @@ export class LpgRailroadDiagramProvider extends WebviewProvider {
                     const script = this.backend.getRRDScript(fileName, symbol.name);
                     diagram += `<h3 class=\"${symbol.name}-class\">${symbol.name}</h3>\n<script>${script}</script>\n\n`;
                 }
-            }
+            }*/
             diagram += "</div>";
         } else {
-
-            const [ruleName, ruleIndex = -1] = this.backend.ruleFromPosition(fileName, caret.character, caret.line + 1);
-            if (!ruleName) {
+        /*
+           const [ruleName, ruleIndex = -1] = this.backend.ruleFromPosition(fileName, caret.character, caret.line + 1);
+             if (!ruleName) {
                 return "";
             }
 
@@ -81,6 +81,7 @@ export class LpgRailroadDiagramProvider extends WebviewProvider {
                     <script>${this.backend.getRRDScript(fileName, ruleName)}</script>
                 </div>
             `;
+            */
         }
         diagram += "</body></html>";
 

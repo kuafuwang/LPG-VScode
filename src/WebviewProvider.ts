@@ -8,6 +8,7 @@
 import * as path from "path";
 import { Utils } from "./Utils";
 import { window, workspace, TextEditor, ExtensionContext, Uri, WebviewPanel, Webview, ViewColumn } from "vscode";
+import { LanguageClient } from "vscode-languageclient/node";
 
 export interface WebviewShowOptions {
     [key: string]: boolean | number | string;
@@ -30,7 +31,7 @@ export class WebviewProvider {
     // Keep track of all created panels, to avoid duplicates.
     private webViewMap = new Map<String, [WebviewPanel, WebviewShowOptions]>();
 
-    public constructor(protected context: ExtensionContext) { }
+    public constructor(protected languageClient : LanguageClient,protected context: ExtensionContext) { }
 
     public showWebview(source: TextEditor | Uri, options: WebviewShowOptions): void {
         this.currentEditor = (source instanceof Uri) ? undefined : source;

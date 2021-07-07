@@ -186,10 +186,12 @@ function render() {
 	    nodes.forEach(function (d) {
 	        if (d.data.references) {
 	            d.data.references.forEach(function (i) {
-	                references.push({
-	                    source: map[d.data.name],
-	                    target: map[i]
-	                });
+					if(map[i] && map[d.data.name]){
+						references.push({
+							source: map[d.data.name],
+							target: map[i]
+						});
+					}
 	            });
 	        }
 	    });

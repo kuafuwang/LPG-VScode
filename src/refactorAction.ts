@@ -7,6 +7,7 @@ import { FormattingOptions,  WorkspaceEdit, CreateFile, RenameFile, DeleteFile, 
 import { Commands, Commands as javaCommands } from './commands';
 import {   GetInlineNonTerminalRefactorRequest, GetMakeEmptyRefactorRequest, GetMakeLeftRecursiveRefactorRequest, GetNonEmptyRefactorRequest, RefactorWorkspaceEdit} from './protocol';
 import { LanguageClient } from 'vscode-languageclient/node';
+import { getTextDocumentPositionParams } from './Utils';
 export function registerCommands(languageClient: LanguageClient, context: ExtensionContext) {
     registerApplyRefactorCommand(languageClient, context);
 }
@@ -37,20 +38,7 @@ async function applyRefactorEdit(languageClient: LanguageClient, refactorEdit: R
         }
     }
 }
-function getTextDocumentPositionParams(languageClient: LanguageClient,): TextDocumentPositionParams | undefined {
-    if(! window.activeTextEditor){
-        return undefined;
-    }
-    let activeTextEditor:  TextEditor = window.activeTextEditor;
-    const params: TextDocumentPositionParams = {
-       
-        textDocument: {
-            uri: activeTextEditor.document.uri.toString(),
-        },
-        position: languageClient.code2ProtocolConverter.asPosition(activeTextEditor.selection.active),
-    };
-    return params;
-}
+
 function registerApplyRefactorCommand(languageClient: LanguageClient, context: ExtensionContext): void {
     context.subscriptions.push(commands.registerCommand(Commands.LPG_MAKE_NON_EMPTY,async () =>{
 

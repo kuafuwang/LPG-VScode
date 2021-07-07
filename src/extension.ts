@@ -24,12 +24,14 @@ import { LanguageClient, ServerOptions, StreamInfo } from 'vscode-languageclient
 import { logger, initializeLogFile } from './log';
 
 import { Commands } from './commands';
-import { deleteDirectory, isString } from './utils';
+import { deleteDirectory, getTextDocumentPositionParams, isString } from './utils';
 import { ActionableMessage, ActionableNotification, ProgressReport, ProgressReportNotification } from './protocol';
 import { serverTasks } from './serverTasks';
 import * as refactorAction from './refactorAction';
 import { TextEditor } from 'vscode';
-
+import { LpgCallGraphProvider } from './CallGraphProvider';
+import { TextEditorEdit } from 'vscode';
+import { CallGraphRequest, ReferenceNodeInfo } from "./protocol";
 
 
 
@@ -336,7 +338,17 @@ export function activate(context: vscode.ExtensionContext)
 
    context.subscriptions.push(commands.registerCommand(Commands.OPEN_LOGS, () => openLogs()));
    refactorAction.registerCommands(languageClient, context);
-
+   // The call graph command.
+   const callGraphProvider = new LpgCallGraphProvider(languageClient,context);
+   context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_CALL_GRAPH,
+	   async (textEditor: TextEditor, edit: TextEditorEdit) => {
+		callGraphProvider.graph = await   languageClient.sendRequest(
+			CallGraphRequest.type, getTextDocumentPositionParams(languageClient));
+		   callGraphProvider.showWebview(textEditor, {
+			   title: "Call Graph: " + path.basename(textEditor.document.fileName),
+		   });
+	   }),
+   );
 
 	languageClient.onReady().then(() => {
 		languageClient.onNotification(ProgressReportNotification.type, (progress : ProgressReport) => {
