@@ -10,9 +10,9 @@ import * as path from "path";
 import { WebviewProvider, WebviewShowOptions } from "./WebviewProvider";
 import { Utils } from "./Utils";
 import { TextEditor, Uri, Webview } from "vscode";
-import { ReferenceNodeInfo } from "./protocol";
+import { CallGraphNodeInfo } from "./protocol";
 export class LpgCallGraphProvider extends WebviewProvider {
-    graph :  Array<ReferenceNodeInfo> ;
+    graph :  Array<CallGraphNodeInfo> ;
     
     public  generateContent(webView: Webview, source: TextEditor | Uri, options: WebviewShowOptions): string
     {

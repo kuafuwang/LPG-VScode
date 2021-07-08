@@ -34,5 +34,10 @@ export namespace Commands {
      export const LPG_MAKE_INLINE_NONT_TERMINAL = 'lpg.inlineNonTerminal';
 
 
-     export const LPG_CALL_GRAPH = 'lpg.call-graph'
+     export const LPG_CALL_GRAPH = 'lpg.call-graph';
+
+     export const LPG_RRD_SINGLE_RULE = 'lpg.rrd.singleRule';
+
+     
+     export const LPG_RRD_ALL_RULE = 'lpg.rrd.allRules'
 }

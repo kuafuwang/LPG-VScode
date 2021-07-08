@@ -1,10 +1,8 @@
 'use strict';
 
-import { existsSync } from 'fs';
-import * as path from 'path';
-import { commands, ExtensionContext, Position, QuickPickItem, TextDocument, TextEditor, TextEditorEdit, Uri, window, workspace } from 'vscode';
-import { FormattingOptions,  WorkspaceEdit, CreateFile, RenameFile, DeleteFile, TextDocumentEdit, CodeActionParams, SymbolInformation, TextDocumentPositionParams } from 'vscode-languageclient';
-import { Commands, Commands as javaCommands } from './commands';
+
+import { commands, ExtensionContext,  window, workspace } from 'vscode';
+import { Commands} from './commands';
 import {   GetInlineNonTerminalRefactorRequest, GetMakeEmptyRefactorRequest, GetMakeLeftRecursiveRefactorRequest, GetNonEmptyRefactorRequest, RefactorWorkspaceEdit} from './protocol';
 import { LanguageClient } from 'vscode-languageclient/node';
 import { getTextDocumentPositionParams } from './Utils';

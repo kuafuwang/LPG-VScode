@@ -1,11 +1,7 @@
 'use strict';
-import { Uri } from 'vscode';
 import {
-    CodeActionParams,
+  
     Command,
-    ExecuteCommandParams,
-    FormattingOptions,
-    Location,
     MessageType,
     NotificationType,
     RequestType,
@@ -31,11 +27,25 @@ export interface ProgressReport {
 	totalWork: number;
 	complete: boolean;
 }
-export interface ReferenceNodeInfo {
+export interface CallGraphNodeInfo {
     name : string;
     rules: Array<string>;
     terminal: Array<string>;
 
+}
+export interface CallGraphResult {
+    infos: Array<CallGraphNodeInfo> ;
+    errorMessage?: string;
+}
+
+export interface RailRoadScriptInfo {
+    ruleName : string;
+    rrdInfo: string;
+
+}
+export interface RailRoadResult {
+    infos: Array<RailRoadScriptInfo> ;
+    errorMessage?: string;
 }
 export interface ActionableMessage {
 	severity: MessageType;
@@ -81,5 +91,14 @@ export namespace GetInlineNonTerminalRefactorRequest {
     export const type = new RequestType<TextDocumentPositionParams,RefactorWorkspaceEdit,  void>('lpg/inlineNonTerminal');
 }
 export namespace CallGraphRequest {
-    export const type = new RequestType<TextDocumentPositionParams,Array<ReferenceNodeInfo>,  void>('lpg/call-graph');
+    export const type = new RequestType<TextDocumentPositionParams,CallGraphResult,  void>('lpg/call-graph');
 }
+
+export namespace RRD_AllRules_Request {
+    export const type = new RequestType<TextDocumentIdentifier, RailRoadResult,  void>('lpg/rrd.allRules');
+}
+export namespace RRD_SingleRule_Request {
+    export const type = new RequestType<TextDocumentPositionParams, RailRoadResult,  void>('lpg/rrd.singleRule');
+}
+
+

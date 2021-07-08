@@ -37,10 +37,19 @@
 			}
 		],
 		"commands": [
+
 			{
 				"command": "lpg.call-graph",
 				"title": "Show Grammar Call Graph"
 			},
+			{
+                "command": "lpg.rrd.singleRule",
+                "title": "Show Railroad Diagram for Rule"
+            },
+            {
+                "command": "lpg.rrd.allRules",
+                "title": "Show Railroad Diagram for all Rules"
+            },
 			{
 				"command": "lpg.inlineNonTerminal",
 				"title": "Inline Non-Terminal"
@@ -67,13 +76,23 @@
 				},
 				{
 					"when": "resourceLangId == lpg2",
-					"command": "lpg.inlineNonTerminal",
+					"command": "lpg.rrd.singleRule",
 					"group": "lpg2@1"
 				},
 				{
 					"when": "resourceLangId == lpg2",
-					"command": "lpg.MakeLeftRecursive",
+					"command": "lpg.rrd.allRules",
 					"group": "lpg2@1"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.inlineNonTerminal",
+					"group": "lpg2@2"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.MakeLeftRecursive",
+					"group": "lpg2@2"
 				},
 				{
 					"when": "resourceLangId == lpg2",
@@ -83,7 +102,7 @@
 				{
 					"when": "resourceLangId == lpg2",
 					"command": "lpg.MakeNonEmpty",
-					"group": "lpg2@3"
+					"group": "lpg2@2"
 				}
 			]
 		},

@@ -16,6 +16,7 @@ import {
 		    MessageType,
 			WorkspaceEdit,
 			Command,
+			TextDocumentIdentifier,
 		
 		  } from 'vscode-languageclient';
 
@@ -25,13 +26,11 @@ import { logger, initializeLogFile } from './log';
 
 import { Commands } from './commands';
 import { deleteDirectory, getTextDocumentPositionParams, isString } from './utils';
-import { ActionableMessage, ActionableNotification, ProgressReport, ProgressReportNotification } from './protocol';
+import { ActionableMessage, ActionableNotification, ProgressReport, ProgressReportNotification, RRD_AllRules_Request } from './protocol';
 import { serverTasks } from './serverTasks';
 import * as refactorAction from './refactorAction';
 import { TextEditor } from 'vscode';
-import { LpgCallGraphProvider } from './CallGraphProvider';
-import { TextEditorEdit } from 'vscode';
-import { CallGraphRequest, ReferenceNodeInfo } from "./protocol";
+import * as analysisAction from  './Analysis';
 
 
 
@@ -275,7 +274,6 @@ export async function applyWorkspaceEdit(obj :WorkspaceEdit, languageClient : La
 export function activate(context: vscode.ExtensionContext)
 {
 
-
     let storagePath = context.storagePath;
 	if (!storagePath) {
 		storagePath = getTempWorkspace();
@@ -328,28 +326,17 @@ export function activate(context: vscode.ExtensionContext)
         outputChannel:  new OutputInfoCollector(extensionName) ,
         outputChannelName: extensionName
     };
-    console.log('LPG Language Server start active!');
-    languageClient = new LanguageClient('LPG Language Server', serverOptions, clientOptions);
+   console.log('LPG Language Server start active!');
+   languageClient = new LanguageClient('LPG Language Server', serverOptions, clientOptions);
 
    // Register commands here to make it available even when the language client fails
    context.subscriptions.push(commands.registerCommand(Commands.OPEN_SERVER_LOG, (column: ViewColumn) => openServerLogFile(workspacePath, column)));
 
    context.subscriptions.push(commands.registerCommand(Commands.OPEN_CLIENT_LOG, (column: ViewColumn) => openClientLogFile(clientLogFile, column)));
-
    context.subscriptions.push(commands.registerCommand(Commands.OPEN_LOGS, () => openLogs()));
-   refactorAction.registerCommands(languageClient, context);
-   // The call graph command.
-   const callGraphProvider = new LpgCallGraphProvider(languageClient,context);
-   context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_CALL_GRAPH,
-	   async (textEditor: TextEditor, edit: TextEditorEdit) => {
-		callGraphProvider.graph = await   languageClient.sendRequest(
-			CallGraphRequest.type, getTextDocumentPositionParams(languageClient));
-		   callGraphProvider.showWebview(textEditor, {
-			   title: "Call Graph: " + path.basename(textEditor.document.fileName),
-		   });
-	   }),
-   );
 
+   refactorAction.registerCommands(languageClient, context);
+   analysisAction.registerCommands(languageClient,context);
 	languageClient.onReady().then(() => {
 		languageClient.onNotification(ProgressReportNotification.type, (progress : ProgressReport) => {
 			serverTasks.updateServerTask(progress);
