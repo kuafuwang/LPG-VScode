@@ -5,7 +5,7 @@ import * as path from 'path';
 import { commands, ExtensionContext, Position, QuickPickItem, TextDocument, TextEditor, TextEditorEdit, Uri, window, workspace } from 'vscode';
 import { FormattingOptions,  WorkspaceEdit, CreateFile, RenameFile, DeleteFile, TextDocumentEdit, CodeActionParams, SymbolInformation, TextDocumentPositionParams, TextDocumentIdentifier } from 'vscode-languageclient';
 import { Commands, Commands as javaCommands } from './commands';
-import {   CallGraphRequest, GetInlineNonTerminalRefactorRequest, GetMakeEmptyRefactorRequest, GetMakeLeftRecursiveRefactorRequest, GetNonEmptyRefactorRequest, RefactorWorkspaceEdit, RRD_AllRules_Request, RRD_SingleRule_Request} from './protocol';
+import {   CallGraphRequest, FirstSet_AllRules_Request, FirstSet_SingleRule_Request, FollowSet_AllRules_Request, FollowSet_SingleRule_Request, GetInlineNonTerminalRefactorRequest, GetMakeEmptyRefactorRequest, GetMakeLeftRecursiveRefactorRequest, GetNonEmptyRefactorRequest, RefactorWorkspaceEdit, RRD_AllRules_Request, RRD_SingleRule_Request} from './protocol';
 import { LanguageClient } from 'vscode-languageclient/node';
 import { getTextDocumentPositionParams } from './Utils';
 import { LpgRailroadDiagramProvider } from './RailroadDiagramProvider';
@@ -64,6 +64,88 @@ function registerAnalysisCommand(languageClient: LanguageClient, context: Extens
 	diagramProvider.symbols = result.infos;
 	diagramProvider.showWebview(textEditor, {
 			   title: "RRD: " + path.basename(textEditor.document.fileName),
+			   fullList: true,
+		   });
+	   }),
+
+   );
+
+
+   const firstsetProvider = new LpgRailroadDiagramProvider(languageClient,context);
+
+   // The single RRD diagram command.
+   context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_FIRST_SET_SINGLE_RULE,
+	async  (textEditor: TextEditor, edit: TextEditorEdit) => {
+
+		const  result   = await   languageClient.sendRequest(FirstSet_SingleRule_Request.type, 
+			getTextDocumentPositionParams(languageClient) );
+		if (result.errorMessage) {
+			window.showErrorMessage(result.errorMessage);
+			return;
+		}
+		firstsetProvider.symbols = result.infos;
+		firstsetProvider.showWebview(textEditor, {
+			   title: "First set: " + path.basename(textEditor.document.fileName),
+			   fullList: false,
+		   });
+	   }),
+   );
+
+ 
+   context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_FIRST_SET_ALL_RULE,
+   async  (textEditor: TextEditor, edit: TextEditorEdit) => {
+	const textDocument : TextDocumentIdentifier = {
+		uri : window.activeTextEditor.document.uri.toString()
+	};
+	const  result   = await   languageClient.sendRequest(FirstSet_AllRules_Request.type, textDocument );
+    if (result.errorMessage) {
+        window.showErrorMessage(result.errorMessage);
+        return;
+    }
+	firstsetProvider.symbols = result.infos;
+	firstsetProvider.showWebview(textEditor, {
+			   title: "First set: " + path.basename(textEditor.document.fileName),
+			   fullList: true,
+		   });
+	   }),
+
+   );
+
+
+   const followsetProvider = new LpgRailroadDiagramProvider(languageClient,context);
+
+   
+   context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_FOLLOW_SET_SINGLE_RULE,
+	async  (textEditor: TextEditor, edit: TextEditorEdit) => {
+
+		const  result   = await   languageClient.sendRequest(FollowSet_SingleRule_Request.type, 
+			getTextDocumentPositionParams(languageClient) );
+		if (result.errorMessage) {
+			window.showErrorMessage(result.errorMessage);
+			return;
+		}
+		followsetProvider.symbols = result.infos;
+		followsetProvider.showWebview(textEditor, {
+			   title: "Follow set: " + path.basename(textEditor.document.fileName),
+			   fullList: false,
+		   });
+	   }),
+   );
+
+ 
+   context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_FOLLOW_SET_ALL_RULE,
+   async  (textEditor: TextEditor, edit: TextEditorEdit) => {
+	const textDocument : TextDocumentIdentifier = {
+		uri : window.activeTextEditor.document.uri.toString()
+	};
+	const  result   = await   languageClient.sendRequest(FollowSet_AllRules_Request.type, textDocument );
+    if (result.errorMessage) {
+        window.showErrorMessage(result.errorMessage);
+        return;
+    }
+	followsetProvider.symbols = result.infos;
+	followsetProvider.showWebview(textEditor, {
+			   title: "Follow set: " + path.basename(textEditor.document.fileName),
 			   fullList: true,
 		   });
 	   }),

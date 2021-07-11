@@ -101,4 +101,16 @@ export namespace RRD_SingleRule_Request {
     export const type = new RequestType<TextDocumentPositionParams, RailRoadResult,  void>('lpg/rrd.singleRule');
 }
 
+export namespace FirstSet_AllRules_Request {
+    export const type = new RequestType<TextDocumentIdentifier, RailRoadResult,  void>('lpg/firset.allRules');
+}
+export namespace FirstSet_SingleRule_Request {
+    export const type = new RequestType<TextDocumentPositionParams, RailRoadResult,  void>('lpg/firset.singleRule');
+}
 
+export namespace FollowSet_AllRules_Request {
+    export const type = new RequestType<TextDocumentIdentifier, RailRoadResult,  void>('lpg/fowllow.allRules');
+}
+export namespace FollowSet_SingleRule_Request {
+    export const type = new RequestType<TextDocumentPositionParams, RailRoadResult,  void>('lpg/fowllow.singleRule');
+}

@@ -51,6 +51,22 @@
                 "title": "Show Railroad Diagram for all Rules"
             },
 			{
+                "command": "lpg.firset.singleRule",
+                "title": "Show first set  for Rule"
+            },
+            {
+                "command": "lpg.firset.allRules",
+                "title": "Show first set for all Rules"
+            },
+			{
+                "command": "lpg.fowllow.singleRule",
+                "title": "Show fowllow set  for Rule"
+            },
+            {
+                "command": "lpg.fowllow.allRules",
+                "title": "Show fowllow set for all Rules"
+            },
+			{
 				"command": "lpg.inlineNonTerminal",
 				"title": "Inline Non-Terminal"
 			},
@@ -82,6 +98,26 @@
 				{
 					"when": "resourceLangId == lpg2",
 					"command": "lpg.rrd.allRules",
+					"group": "lpg2@1"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.firset.singleRule",
+					"group": "lpg2@1"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.firset.allRules",
+					"group": "lpg2@1"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.fowllow.singleRule",
+					"group": "lpg2@1"
+				},
+				{
+					"when": "resourceLangId == lpg2",
+					"command": "lpg.fowllow.allRules",
 					"group": "lpg2@1"
 				},
 				{

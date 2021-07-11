@@ -40,4 +40,14 @@ export namespace Commands {
 
      
      export const LPG_RRD_ALL_RULE = 'lpg.rrd.allRules'
+
+     export const LPG_FIRST_SET_SINGLE_RULE = 'lpg.firset.singleRule';
+
+     
+     export const LPG_FIRST_SET_ALL_RULE = 'lpg.firset.allRules'
+
+     export const LPG_FOLLOW_SET_SINGLE_RULE = 'lpg.fowllow.singleRule';
+
+     
+     export const LPG_FOLLOW_SET_ALL_RULE = 'lpg.fowllow.allRules'
 }
