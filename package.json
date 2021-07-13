@@ -5,7 +5,7 @@
 		"url": "https://github.com/kuafuwang/LPG-VScode/issues"
 	},
 	"categories": [],
-	"description": "Language server for lpg2",
+	"description": "Language server for lpg",
 	"homepage": "https://github.com/kuafuwang/LPG-VScode/blob/master/README.md",
 	"keywords": [
 		"LPG",
@@ -22,17 +22,17 @@
 		"vscode": "^1.48.0"
 	},
 	"activationEvents": [
-		"onLanguage:lpg2"
+		"onLanguage:lpg"
 	],
 	"main": "./out/extension",
 	"contributes": {
 		"languages": [
 			{
-				"id": "lpg2",
+				"id": "lpg",
 				"extensions": [
 					".g",
 					".gi",
-					".lpg2"
+					".lpg"
 				]
 			}
 		],
@@ -81,65 +81,74 @@
 			{
 				"command": "lpg.MakeNonEmpty",
 				"title": "Make Non-Empty"
-			}
+			},
+			{
+                "command": "lpg.tools.generateParser",
+                "title": "Generate parser for grammar file"
+            }
 		],
 		"menus": {
 			"editor/context": [
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.call-graph",
-					"group": "lpg2@1"
+					"group": "lpg@1"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.rrd.singleRule",
-					"group": "lpg2@1"
+					"group": "lpg@2"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.rrd.allRules",
-					"group": "lpg2@1"
+					"group": "lpg@3"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.firset.singleRule",
-					"group": "lpg2@1"
+					"group": "lpg@4"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.firset.allRules",
-					"group": "lpg2@1"
+					"group": "lpg@5"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.fowllow.singleRule",
-					"group": "lpg2@1"
+					"group": "lpg@6"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.fowllow.allRules",
-					"group": "lpg2@1"
+					"group": "lpg@7"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.inlineNonTerminal",
-					"group": "lpg2@2"
+					"group": "lpg@8"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.MakeLeftRecursive",
-					"group": "lpg2@2"
+					"group": "lpg@9"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.makeEmpty",
-					"group": "lpg2@2"
+					"group": "lpg@10"
 				},
 				{
-					"when": "resourceLangId == lpg2",
+					"when": "resourceLangId == lpg",
 					"command": "lpg.MakeNonEmpty",
-					"group": "lpg2@2"
-				}
+					"group": "lpg@11"
+				},
+				{
+                    "when": "resourceLangId == lpg",
+                    "command": "lpg.tools.generateParser",
+                    "group": "lpg@12"
+                }
 			]
 		},
 		"configuration": {
@@ -162,7 +171,106 @@
 					],
 					"default": "off",
 					"description": "Traces the communication between VS Code and the language server."
-				}
+				},
+				"lpg.referencesCodeLens.enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable/disable the references code lens"
+                },
+                "lpg.customCSS": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "description": "List of custom CSS URIs for diagram SVG files"
+                },
+                "lpg.rrd.saveDir": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Default export target folder for railroad diagrams"
+                },
+				"lpg.firset.saveDir": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Default export target folder for firset set"
+                },
+				"lpg.fowllow.saveDir": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Default export target folder for fowllow set "
+                },
+                "lpg.call-graph.saveDir": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Default export target folder for call graphs"
+                },
+                "lpg.generation": {
+                    "type": "object",
+                    "default": {
+                        "mode": "internal",
+                        "language": "java",   
+                        "visitor": "default"
+                    },
+                    "description": "Settings related to parser generation",
+                    "properties": {
+                        "mode": {
+                            "type": "string",
+                            "default": "internal",
+                            "description": "Determines the mode for code generation (none at all, only for internal use, also for external use)",
+                            "enum": [
+                                "none",
+                                "internal",
+                                "external"
+                            ]
+                        },
+                        "outputDir": {
+                            "type": "string",
+                            "default": "",
+                            "description": "Output dir where all output is generated (relative to grammar or absolute path)"
+                        },
+                        "includeDir": {
+                            "type": "string",
+                            "default": "",
+                            "description": "Location to import/include grammars from (relative to a grammar or absolute path)"
+                        },
+                        "language": {
+                            "type": "string",
+                            "default": "java",
+                            "description": "Specifies the target language for the generated code, overriding what is specified in the grammar",
+							"enum": [
+                                "xml",
+                                "c",
+                                "c++",
+								"rt_cpp",
+								"java",
+								"plx",
+								"plx",
+								"plxasm",
+								"ml"
+                            ]
+                        },
+				
+                        "visitor": {
+                            "type": "string",
+                            "default": false,
+                            "description": "Create visitor on code generation",
+							"enum": [
+                                "none",
+                                "default",
+                                "preorder"
+                            ]
+                        },
+                        "alternativeExe": {
+                            "type": "string",
+                            "description": "Path to a exe file to be used for parser generation"
+                        },
+                        "additionalParameters": {
+                            "type": "string",
+                            "description": "Any other command line parameters you want to send to the LPG"
+                        }
+                    }
+                }
 			}
 		}
 	},
@@ -171,6 +279,7 @@
 		"compile": "tsc -p ./"
 	},
 	"dependencies": {
+		"expand-home-dir": "^0.0.3",
 		"fs-extra": "^9.0.1",
 	    "d3": "^5.9.0",
 		"abort-controller": "3.0.0",

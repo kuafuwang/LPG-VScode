@@ -31,6 +31,9 @@ import { serverTasks } from './serverTasks';
 import * as refactorAction from './refactorAction';
 import { TextEditor } from 'vscode';
 import * as analysisAction from  './Analysis';
+import { ProgressIndicator } from './ProgressIndicator';
+import { TextEditorEdit } from 'vscode';
+import { regenerateParser } from './GrammarGenerator';
 
 
 
@@ -38,7 +41,8 @@ var languageClient: LanguageClient ;
 const cleanWorkspaceFileName = '.cleanWorkspace';
 const extensionName = 'Language Support for LPG';
 let clientLogFile : string;
-
+let progress: ProgressIndicator;
+let outputChannel : OutputInfoCollector;
 class FileStatus
 {
     private statuses = new Map<string, any>();
@@ -273,7 +277,7 @@ export async function applyWorkspaceEdit(obj :WorkspaceEdit, languageClient : La
 }
 export function activate(context: vscode.ExtensionContext)
 {
-
+	progress = new ProgressIndicator();
     let storagePath = context.storagePath;
 	if (!storagePath) {
 		storagePath = getTempWorkspace();
@@ -309,12 +313,12 @@ export function activate(context: vscode.ExtensionContext)
         return Promise.resolve(result);
     };
     const serverOptions: ServerOptions = server;
-
+    outputChannel = new OutputInfoCollector(extensionName);
     let clientOptions: LanguageClientOptions =
     {
         // Register the server for plain text documents
         documentSelector: [
-            {scheme: 'file', language: 'lpg2'},
+            {scheme: 'file', language: 'lpg'},
            
         ],
 		revealOutputChannelOn: RevealOutputChannelOn.Never,
@@ -323,7 +327,7 @@ export function activate(context: vscode.ExtensionContext)
 			logger.error(`Failed to initialize ${extensionName} due to ${error && error.toString()}`);
 			return true;
 		},
-        outputChannel:  new OutputInfoCollector(extensionName) ,
+        outputChannel:  outputChannel ,
         outputChannelName: extensionName
     };
    console.log('LPG Language Server start active!');
@@ -334,7 +338,10 @@ export function activate(context: vscode.ExtensionContext)
 
    context.subscriptions.push(commands.registerCommand(Commands.OPEN_CLIENT_LOG, (column: ViewColumn) => openClientLogFile(clientLogFile, column)));
    context.subscriptions.push(commands.registerCommand(Commands.OPEN_LOGS, () => openLogs()));
-
+   context.subscriptions.push(commands.registerTextEditorCommand("lpg.tools.generateParser",
+   (textEditor: TextEditor, edit: TextEditorEdit) => {
+		regenerateParser(textEditor.document,progress,outputChannel);
+   }));
    refactorAction.registerCommands(languageClient, context);
    analysisAction.registerCommands(languageClient,context);
 	languageClient.onReady().then(() => {
