@@ -33,7 +33,7 @@ import { TextEditor } from 'vscode';
 import * as analysisAction from  './Analysis';
 import { ProgressIndicator } from './ProgressIndicator';
 import { TextEditorEdit } from 'vscode';
-import { regenerateParser } from './GrammarGenerator';
+import { GetGenerationOptions, regenerateParser } from './GrammarGenerator';
 
 
 
@@ -275,6 +275,7 @@ export async function applyWorkspaceEdit(obj :WorkspaceEdit, languageClient : La
 		}
 	}
 }
+
 export function activate(context: vscode.ExtensionContext)
 {
 	progress = new ProgressIndicator();
@@ -314,6 +315,8 @@ export function activate(context: vscode.ExtensionContext)
     };
     const serverOptions: ServerOptions = server;
     outputChannel = new OutputInfoCollector(extensionName);
+	
+	let generate_option = GetGenerationOptions(undefined,undefined);
     let clientOptions: LanguageClientOptions =
     {
         // Register the server for plain text documents
@@ -328,7 +331,12 @@ export function activate(context: vscode.ExtensionContext)
 			return true;
 		},
         outputChannel:  outputChannel ,
-        outputChannelName: extensionName
+        outputChannelName: extensionName,
+		initializationOptions:{
+		   settings: {
+			    options: generate_option
+			}
+		}
     };
    console.log('LPG Language Server start active!');
    languageClient = new LanguageClient('LPG Language Server', serverOptions, clientOptions);

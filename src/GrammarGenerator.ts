@@ -7,7 +7,8 @@ import { workspace } from "vscode";
 import { window } from "vscode";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { OutputInfoCollector } from "./extension";
-let  LPG_GENERATION = "lgp.generation";
+import { Constant } from "./commands";
+
 const isWindows: boolean = process.platform.indexOf("win") === 0;
 const isMac: boolean = process.platform.indexOf("darwin") === 0;
 const isLinux: boolean = process.platform.indexOf("linux") === 0;
@@ -15,13 +16,17 @@ const expandHomeDir = require("expand-home-dir");
 /**
  * Options used by the parser files generation.
  */
+
  export interface GenerationOptions {
     // The folder in which to run the generation process. Should be an absolute path for predictable results.
     // Used internally only.
     baseDir?: string;
 
-    // Search path for the ANTLR tool.
-    includeDir?: string;
+    // Search template  path for the LPG tool.
+    template_search_directory?: string;
+
+    // Search inlcude  path for the LPG tool.
+    include_search_directory?: string;
 
     // The folder where to place generated files in (relative to baseDir or absolute) (default: grammar dir),
     outputDir?: string;
@@ -60,7 +65,21 @@ async function fromEnv(name: string): Promise<string[]> {
     return ret;
 }
 
-
+export function GetGenerationOptions(basePath: string | undefined, outputDir : string | undefined):GenerationOptions
+{
+    const config = workspace.getConfiguration(Constant.LPG_GENERATION);
+    const options: GenerationOptions = {
+        baseDir: basePath,
+        include_search_directory: config.include_search_directory as string,
+        outputDir,
+        language : config.language as string,
+        package : config.package as string,    
+        visitor : config.visitor as string,
+        alternativeExe: config.alternativeExe as string,
+        additionalParameters: config.additionalParameters as string,
+    };
+    return options;
+}
     /**
      * For certain services we have to (re)generate files from grammars in the background:
      * - syntactic + semantic grammar analysis by the ANTLR tool
@@ -72,23 +91,25 @@ async function fromEnv(name: string): Promise<string[]> {
         progress : ProgressIndicator,
         outputChannel:OutputInfoCollector): void 
         {
-        if (workspace.getConfiguration(LPG_GENERATION).mode === "none") {
+        const config = workspace.getConfiguration(Constant.LPG_GENERATION);
+        if (config.mode === "none") {
             return;
         }
+
         const grammarFileName = document.uri.fsPath;
     
-        const externalMode = workspace.getConfiguration(LPG_GENERATION).mode === "external";
+        const externalMode = config.mode === "external";
          
         progress.startAnimation();
         const basePath = path.dirname(document.fileName);
-       
+    
 
         // In internal mode we generate files with the default target language into our .antlr folder.
         // In external mode the files are generated into the given output folder (or the folder where the
         // main grammar is). In this case we have to move the interpreter data to our .antlr folder.
         let outputDir = path.join(basePath, ".lpg");
         if (externalMode) {
-            outputDir = workspace.getConfiguration(LPG_GENERATION).outputDir as string;
+            outputDir = config.outputDir as string;
             if (!outputDir) {
                 outputDir = basePath;
             } else {
@@ -106,18 +127,9 @@ async function fromEnv(name: string): Promise<string[]> {
 
             return;
         }
-
-        const options: GenerationOptions = {
-            baseDir: basePath,
-            includeDir: workspace.getConfiguration(LPG_GENERATION).includeDir as string,
-            outputDir,
-            language : workspace.getConfiguration(LPG_GENERATION).language as string,
-            package : workspace.getConfiguration(LPG_GENERATION).package as string,    
-            visitor : workspace.getConfiguration(LPG_GENERATION).visitor as string,
-            alternativeExe: workspace.getConfiguration(LPG_GENERATION).alternativeExe as string,
-            additionalParameters: workspace.getConfiguration(LPG_GENERATION).additionalParameters as string,
-        };
-
+      
+        const options= GetGenerationOptions(basePath,outputDir);
+        
         const result = generate(grammarFileName, options);
         result.then((out_strings: string[]) => {
             for (const str of out_strings) {
@@ -156,8 +168,8 @@ async function fromEnv(name: string): Promise<string[]> {
             parameters.push("-programming_language=" + options.language);
         }
 
-        if (options.includeDir) {
-            parameters.push("-include-directory=" + options.includeDir);
+        if (options.include_search_directory) {
+            parameters.push("-include-directory=" + options.include_search_directory);
         }
 
         if (options.outputDir) {

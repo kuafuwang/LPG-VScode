@@ -209,7 +209,6 @@
                     "type": "object",
                     "default": {
                         "mode": "internal",
-                        "language": "java",   
                         "visitor": "default"
                     },
                     "description": "Settings related to parser generation",
@@ -229,10 +228,15 @@
                             "default": "",
                             "description": "Output dir where all output is generated (relative to grammar or absolute path)"
                         },
-                        "includeDir": {
+                        "include_search_directory": {
                             "type": "string",
                             "default": "",
                             "description": "Location to import/include grammars from (relative to a grammar or absolute path)"
+                        },
+						"template_search_directory": {
+                            "type": "string",
+                            "default": "",
+                            "description": "Location to template grammars from (relative to a grammar or absolute path)"
                         },
                         "language": {
                             "type": "string",
@@ -253,7 +257,7 @@
 				
                         "visitor": {
                             "type": "string",
-                            "default": false,
+                            "default": "default",
                             "description": "Create visitor on code generation",
 							"enum": [
                                 "none",
