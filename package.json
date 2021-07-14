@@ -265,6 +265,27 @@
                                 "preorder"
                             ]
                         },
+						"trace": {
+                            "type": "string",
+                            "default": "conflicts",
+                            "description": "trace rule info when code generation",
+							"enum": [
+                                "none",
+                                "default",
+                                "full"
+                            ]
+                        },
+						"quiet": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "quit option"
+                        },
+						"verbose": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "verbose option"
+                        },
+						
                         "alternativeExe": {
                             "type": "string",
                             "description": "Path to a exe file to be used for parser generation"

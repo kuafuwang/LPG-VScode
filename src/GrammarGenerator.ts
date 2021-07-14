@@ -18,6 +18,7 @@ const expandHomeDir = require("expand-home-dir");
  */
 
  export interface GenerationOptions {
+ 
     // The folder in which to run the generation process. Should be an absolute path for predictable results.
     // Used internally only.
     baseDir?: string;
@@ -40,9 +41,14 @@ const expandHomeDir = require("expand-home-dir");
     // Generate visitor files if set (default: false).
     visitor?: string;
 
+    trace?: string;
+    quiet?: boolean;
+    verbose?: boolean;
 
     // Use this jar for work instead of the built-in one(s).
     alternativeExe?: string;
+
+
 
     // Any additional parameter you want to send to LPG for generation (e.g. "-lalr=3").
     additionalParameters?: string;
@@ -75,6 +81,9 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         language : config.language as string,
         package : config.package as string,    
         visitor : config.visitor as string,
+        trace: config.trace as string,
+        quiet: config.quiet as boolean,
+        verbose: config.verbose as boolean,
         alternativeExe: config.alternativeExe as string,
         additionalParameters: config.additionalParameters as string,
     };
@@ -167,6 +176,21 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         if (options.language) {
             parameters.push("-programming_language=" + options.language);
         }
+        if (options.quiet) {
+            parameters.push("-quiet");
+        }
+        if (options.package) {
+            parameters.push("-package="+ options.package);
+        }
+        if (options.verbose) {
+            parameters.push("-verbose");
+        }
+        if (options.visitor) {
+            parameters.push("-visitor=" + options.visitor);
+        }
+        if (options.trace) {
+            parameters.push("-trace=" + options.trace);
+        } 
 
         if (options.include_search_directory) {
             parameters.push("-include-directory=" + options.include_search_directory);
