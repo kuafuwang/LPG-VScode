@@ -1,9 +1,17 @@
 'use strict';
+import * as net from 'net';
 import * as fs from "fs-extra";
 import * as path from 'path';
 import { TextEditor } from "vscode";
 import { workspace, WorkspaceConfiguration, TextDocument, ExtensionContext, Uri, window, Webview } from 'vscode';
-import { LanguageClient, TextDocumentPositionParams } from "vscode-languageclient/node";
+import { Event, LanguageClient, TextDocumentPositionParams } from "vscode-languageclient/node";
+
+import getPort = require('get-port');
+import { resolve } from 'path';
+import { reject } from 'lodash';
+export const isWindows: boolean = process.platform.indexOf("win") === 0;
+export const isMac: boolean = process.platform.indexOf("darwin") === 0;
+export const isLinux: boolean = process.platform.indexOf("linux") === 0;
 
 export function getJavaConfiguration(): WorkspaceConfiguration {
 	return workspace.getConfiguration('java');
@@ -104,6 +112,12 @@ export async function waitForDocumentChangesToEnd(document: TextDocument): Promi
 	});
 }
 
+export   async function get_free_port() : Promise<string> {
+     let port =   await getPort();
+     return new Promise<string>( (resolve) => {
+        resolve(port.toString());
+     });
+ }
 export class Utils {
 
     /**
@@ -222,7 +236,7 @@ export class Utils {
 // ！！！ 使用 is 来确认参数 s 是一个 string 类型
 export function isString(s :unknown): s is string {
     return typeof s === 'string';
-  }
+}
    
   export function getTextDocumentPositionParams(languageClient: LanguageClient,): TextDocumentPositionParams | undefined {
     if(! window.activeTextEditor){

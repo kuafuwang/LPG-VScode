@@ -23,9 +23,9 @@ import {
 import { LanguageClient, ServerOptions, StreamInfo } from 'vscode-languageclient/node';
 
 import { logger, initializeLogFile } from './log';
-
+import * as child_process from "child_process";
 import { Commands } from './commands';
-import { deleteDirectory, getTextDocumentPositionParams, isString } from './utils';
+import { deleteDirectory, getTextDocumentPositionParams, get_free_port, isString } from './utils';
 import { ActionableMessage, ActionableNotification, ProgressReport, ProgressReportNotification, RRD_AllRules_Request } from './protocol';
 import { serverTasks } from './serverTasks';
 import * as refactorAction from './refactorAction';
@@ -33,7 +33,7 @@ import { TextEditor } from 'vscode';
 import * as analysisAction from  './Analysis';
 import { ProgressIndicator } from './ProgressIndicator';
 import { TextEditorEdit } from 'vscode';
-import { GetGenerationOptions, regenerateParser } from './GrammarGenerator';
+import { GetGenerationOptions, get_server_path, regenerateParser } from './GrammarGenerator';
 
 
 
@@ -276,6 +276,9 @@ export async function applyWorkspaceEdit(obj :WorkspaceEdit, languageClient : La
 	}
 }
 
+const DEBUG =  process.env['DEBUG_LPG_VSCODE'] === 'true';
+
+let server_process : child_process.ChildProcessWithoutNullStreams ;
 export function activate(context: vscode.ExtensionContext)
 {
 	progress = new ProgressIndicator();
@@ -295,25 +298,39 @@ export function activate(context: vscode.ExtensionContext)
             window.showErrorMessage(`Failed to delete ${workspacePath}: ${error}`);
         }
     }
- 
-/*
-    var fn = __dirname + '/../Server/lpgServer.exe';
-    let server: Executable =
-    {
-        command: fn,
-        args: [],
-        options: { shell: false, detached: false }
-    };
-*/
-    let server = () => {
-        const socket = net.connect(9333);
+
+    let serverOptions : ServerOptions = async () => {
+		let lsPort :string; 
+		if(DEBUG){
+			lsPort = process.env['SERVER_PORT']
+		}
+		else{
+			lsPort = await get_free_port();
+			let [cmd_string, exeHome] = get_server_path();
+			if(!cmd_string.length){
+				window.showErrorMessage("Can't find LPG server");
+			}
+			else{
+				
+				const parameters = [];
+				const spawnOptions = { cwd: exeHome };
+				parameters.push("--port")
+				parameters.push(lsPort)
+				parameters.push("--watchParentProcess")
+				server_process = child_process.spawn(cmd_string, parameters, spawnOptions);
+			}
+	
+		}
+	   
+
+        const socket = net.connect(lsPort);
         const result: StreamInfo = {
             writer: socket,
             reader: socket
         };
         return Promise.resolve(result);
     };
-    const serverOptions: ServerOptions = server;
+    //const serverOptions: ServerOptions = server;
     outputChannel = new OutputInfoCollector(extensionName);
 	
 	let generate_option = GetGenerationOptions(undefined,undefined);

@@ -18,6 +18,22 @@
 			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
+			"name": "Run - Remote Server",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
+			"outFiles": [
+				"${workspaceFolder}/dist/**/*.js"
+			],
+			"env": {
+				"SERVER_PORT": "9333",
+				"DEBUG_LPG_VSCODE":"true"
+			},
+			"preLaunchTask": "${defaultBuildTask}"
+		},
+		{
 			"name": "Extension Tests",
 			"type": "extensionHost",
 			"request": "launch",

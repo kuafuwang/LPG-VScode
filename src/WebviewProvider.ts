@@ -49,7 +49,7 @@ export class WebviewProvider {
         }
 
         const panel = window.createWebviewPanel(
-            "antlr4-vscode-webview", options.title, ViewColumn.Two, {
+            "lpg-vscode-webview", options.title, ViewColumn.Two, {
                 enableScripts: true,
                 retainContextWhenHidden: true,
             },

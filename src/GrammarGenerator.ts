@@ -8,10 +8,10 @@ import { window } from "vscode";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { OutputInfoCollector } from "./extension";
 import { Constant } from "./commands";
+import { isLinux, isWindows } from "./Utils";
+import glob = require("glob");
 
-const isWindows: boolean = process.platform.indexOf("win") === 0;
-const isMac: boolean = process.platform.indexOf("darwin") === 0;
-const isLinux: boolean = process.platform.indexOf("linux") === 0;
+
 const expandHomeDir = require("expand-home-dir");
 /**
  * Options used by the parser files generation.
@@ -145,13 +145,57 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
                 outputChannel.appendLine(str)   
             }
             progress.stopAnimation();
+            window.showInformationMessage("Generate parser for " + grammarFileName + " has done.")
         }).catch((reason) => {
             progress.stopAnimation();
             outputChannel.appendLine(reason);
             outputChannel.show(true);
+            window.showInformationMessage("Generate parser for " + grammarFileName + " failed, reson :"+ reason);
         });
     }
     
+    export function get_server_path(): string[]
+    {
+        let exeHome: string ;
+        if (isWindows) {
+            exeHome = path.resolve(__dirname, '../server/win');
+        
+        } else if(isLinux) {
+            exeHome =   path.resolve(__dirname, '../server/linux');
+        }
+        else{
+            exeHome =  path.resolve(__dirname, '../server/mac');
+        }
+        
+        const launchersFound: Array<string> = glob.sync('**/LPG-language-server*', 
+        { cwd: exeHome });
+        if (launchersFound.length) {
+            return [(path.resolve(exeHome, launchersFound[0])),exeHome] ;
+        } else {
+            return  ["",exeHome] ;
+        }
+    }
+    function get_lpg_generator_path(): string | undefined
+    {
+        let serverHome: string ;
+        if (isWindows) {
+            serverHome = path.resolve(__dirname, '../lpg/win');
+        
+        } else if(isLinux) {
+            serverHome =   path.resolve(__dirname, '../lpg/linux');
+        }
+        else{
+            serverHome =  path.resolve(__dirname, '../lpg/mac');
+        }
+        
+        const launchersFound: Array<string> = glob.sync('**/lpg-v*', 
+        { cwd: serverHome });
+        if (launchersFound.length) {
+            return  (path.resolve(serverHome, launchersFound[0]));
+        } else {
+            return  null;
+        }
+    }
     function generate(fileName : string,options: GenerationOptions): Promise<string[]> 
  {
     return new Promise<string[]>((resolve, reject) => {
@@ -160,13 +204,7 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         if (options.alternativeExe) {
             cmd_string= (options.alternativeExe);
         } else {
-            if (isWindows) {
-                cmd_string=(path.join(__dirname,
-                    "../lpg/lpg.exe"));
-            } else {
-                cmd_string= (path.join(__dirname,
-                    "../lpg/lpg"));
-            }
+            cmd_string = get_lpg_generator_path();
         }
         if (! fs.pathExistsSync(cmd_string) ){
             reject(cmd_string + " didn't exist.")
