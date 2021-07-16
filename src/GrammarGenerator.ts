@@ -247,7 +247,7 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
       
         parameters.push(fileName);
 
-        const spawnOptions = { cwd: options.baseDir ? options.baseDir : undefined };
+        const spawnOptions = { cwd: options.outputDir ? options.outputDir : undefined };
         const lpg_process = child_process.spawn(cmd_string, parameters, spawnOptions);
 
         const outputList: string[] = [];

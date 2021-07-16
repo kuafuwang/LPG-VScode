@@ -25,7 +25,7 @@ import { LanguageClient, ServerOptions, StreamInfo } from 'vscode-languageclient
 import { logger, initializeLogFile } from './log';
 import * as child_process from "child_process";
 import { Commands } from './commands';
-import { deleteDirectory, getTextDocumentPositionParams, get_free_port, isString } from './utils';
+import { deleteDirectory, getTextDocumentPositionParams, get_free_port, isString } from './Utils';
 import { ActionableMessage, ActionableNotification, ProgressReport, ProgressReportNotification, RRD_AllRules_Request } from './protocol';
 import { serverTasks } from './serverTasks';
 import * as refactorAction from './refactorAction';
