@@ -277,7 +277,7 @@ export async function applyWorkspaceEdit(obj :WorkspaceEdit, languageClient : La
 }
 
 const DEBUG =  process.env['DEBUG_LPG_VSCODE'] === 'true';
-
+//const DEBUG =  true;
 let server_process : child_process.ChildProcessWithoutNullStreams ;
 export function activate(context: vscode.ExtensionContext)
 {
