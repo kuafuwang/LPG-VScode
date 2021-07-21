@@ -17,6 +17,7 @@ import {
 			WorkspaceEdit,
 			Command,
 			TextDocumentIdentifier,
+			DidChangeConfigurationNotification,
 		
 		  } from 'vscode-languageclient';
 
@@ -275,7 +276,9 @@ export async function applyWorkspaceEdit(obj :WorkspaceEdit, languageClient : La
 		}
 	}
 }
-
+function getClient(): LanguageClient {
+	return languageClient;
+}
 const DEBUG =  process.env['DEBUG_LPG_VSCODE'] === 'true';
 //const DEBUG =  true;
 let server_process : child_process.ChildProcessWithoutNullStreams ;
@@ -353,7 +356,18 @@ export function activate(context: vscode.ExtensionContext)
 		   settings: {
 			    options: generate_option
 			}
-		}
+		},
+		middleware: {
+			workspace: {
+				didChangeConfiguration: () => {
+					getClient().sendNotification(DidChangeConfigurationNotification.type, {
+						settings: {
+							options: GetGenerationOptions(undefined,undefined)
+						}
+					});
+				}
+			}
+		},
     };
    console.log('LPG Language Server start active!');
    languageClient = new LanguageClient('LPG Language Server', serverOptions, clientOptions);
