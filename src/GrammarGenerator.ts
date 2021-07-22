@@ -76,6 +76,7 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
     const config = workspace.getConfiguration(Constant.LPG_GENERATION);
     const options: GenerationOptions = {
         baseDir: basePath,
+        template_search_directory: config.template_search_directory as string,
         include_search_directory: config.include_search_directory as string,
         outputDir,
         language : config.language as string,
@@ -230,8 +231,19 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
             parameters.push("-trace=" + options.trace);
         } 
 
-        if (options.include_search_directory) {
-            parameters.push("-include-directory=" + options.include_search_directory);
+        if (options.include_search_directory || options.template_search_directory) {
+
+            let arg: string = "-include-directory=";
+            if (options.include_search_directory ) {
+          
+                arg += options.include_search_directory;
+                arg += ";";
+            }
+            if (options.template_search_directory) {
+          
+                arg += options.template_search_directory;
+            }
+            parameters.push(arg);
         }
 
         if (options.outputDir) {
