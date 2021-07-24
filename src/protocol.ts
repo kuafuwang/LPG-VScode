@@ -13,6 +13,9 @@ import {
 } from 'vscode-languageclient';
 
 
+export interface ProviderHandle {
+	handles: any[];
+}
 export interface StatusReport {
 	message: string;
 	type: string;

@@ -1,3 +1,6 @@
+[![](https://vsmarketplacebadge.apphb.com/version-short/kuafuwang.lpg-vscode.svg)](https://marketplace.visualstudio.com/items?itemName=kuafuwang.lpg-vscode)
+
+
 # LPG-VScode README
 
 # lpg-vscode

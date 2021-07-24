@@ -19,14 +19,14 @@
 		"type": "git",
 		"url": "https://github.com/kuafuwang/LPG-VScode"
 	},
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.48.0"
 	},
 	"activationEvents": [
 		"onLanguage:lpg"
 	],
-	"main": "./out/extension",
+	"main": "./dist/extension",
 	"contributes": {
 		"languages": [
 			{
@@ -210,7 +210,8 @@
 					"type": "object",
 					"default": {
 						"mode": "internal",
-						"visitor": "default"
+						"visitor": "default",
+						"language" :"java"
 					},
 					"description": "Settings related to parser generation",
 					"properties": {
@@ -235,12 +236,12 @@
 							"default": "",
 							"description": "Output dir where all output is generated (relative to grammar or absolute path)"
 						},
-						"include_search_directory": {
+						"use_define_include_directory": {
 							"type": "string",
 							"default": "",
 							"description": "Location to import/include grammars from (relative to a grammar or absolute path)"
 						},
-						"template_search_directory": {
+						"use_define_template_directory": {
 							"type": "string",
 							"default": "",
 							"description": "Location to template grammars from (relative to a grammar or absolute path)"
@@ -313,7 +314,7 @@
 		"lint": "eslint \"./src/**/*.ts\""
 	},
 	"dependencies": {
-		"abort-controller": "3.0.0",
+		
 		"d3": "^5.9.0",
 		"expand-home-dir": "^0.0.3",
 		"fs-extra": "^9.0.1",

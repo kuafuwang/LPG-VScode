@@ -38,6 +38,7 @@ import { GetGenerationOptions, get_server_path, regenerateParser } from './Gramm
 
 
 
+
 var languageClient: LanguageClient ;
 const cleanWorkspaceFileName = '.cleanWorkspace';
 const extensionName = 'Language Support for LPG';
@@ -282,79 +283,32 @@ function getClient(): LanguageClient {
 const DEBUG =  process.env['DEBUG_LPG_VSCODE'] === 'true';
 //const DEBUG =  true;
 let server_process : child_process.ChildProcessWithoutNullStreams ;
-export function activate(context: vscode.ExtensionContext)
-{
-	progress = new ProgressIndicator();
-    let storagePath = context.storagePath;
-	if (!storagePath) {
-		storagePath = getTempWorkspace();
-	}
-	clientLogFile = path.join(storagePath, 'client.log');
-    initializeLogFile(clientLogFile);
-    
-    const workspacePath = path.resolve(storagePath + '/LPG_ws');
-    const cleanWorkspaceExists = fs.existsSync(path.join(workspacePath, cleanWorkspaceFileName));
-    if (cleanWorkspaceExists) {
-        try {
-            deleteDirectory(workspacePath);
-        } catch (error) {
-            window.showErrorMessage(`Failed to delete ${workspacePath}: ${error}`);
-        }
-    }
+let lsPort : string;
 
-    let serverOptions : ServerOptions = async () => {
-		let lsPort :string; 
-		if(DEBUG){
-			lsPort = process.env['SERVER_PORT']
-		}
-		else{
-			lsPort = await get_free_port();
-			let [cmd_string, exeHome] = get_server_path();
-			if(!cmd_string.length){
-				window.showErrorMessage("Can't find LPG server");
-			}
-			else{
-				
-				const parameters = [];
-				const spawnOptions = { cwd: exeHome };
-				parameters.push("--port")
-				parameters.push(lsPort)
-				parameters.push("--watchParentProcess")
-				server_process = child_process.spawn(cmd_string, parameters, spawnOptions);
-			}
-	
-		}
-	   
+function get_server_port():string{
+	return lsPort;
+}
+function  start_lpg(context: vscode.ExtensionContext) { 
 
-        const socket = net.connect(lsPort);
-        const result: StreamInfo = {
-            writer: socket,
-            reader: socket
-        };
-        return Promise.resolve(result);
-    };
-    //const serverOptions: ServerOptions = server;
-    outputChannel = new OutputInfoCollector(extensionName);
-	
 	let generate_option = GetGenerationOptions(undefined,undefined);
-    let clientOptions: LanguageClientOptions =
-    {
-        // Register the server for plain text documents
-        documentSelector: [
-            {scheme: 'file', language: 'lpg'},
-           
-        ],
+	let clientOptions: LanguageClientOptions =
+	{
+		// Register the server for plain text documents
+		documentSelector: [
+			{scheme: 'file', language: 'lpg'},
+		   
+		],
 		revealOutputChannelOn: RevealOutputChannelOn.Never,
-        errorHandler: new ClientErrorHandler(extensionName),
+		errorHandler: new ClientErrorHandler(extensionName),
 		initializationFailedHandler: error => {
 			logger.error(`Failed to initialize ${extensionName} due to ${error && error.toString()}`);
 			return true;
 		},
-        outputChannel:  outputChannel ,
-        outputChannelName: extensionName,
+		outputChannel:  outputChannel ,
+		outputChannelName: extensionName,
 		initializationOptions:{
 		   settings: {
-			    options: generate_option
+				options: generate_option
 			}
 		},
 		middleware: {
@@ -368,19 +322,18 @@ export function activate(context: vscode.ExtensionContext)
 				}
 			}
 		},
-    };
+	};
+	let serverOptions : ServerOptions = async () => {
+		const socket = net.connect(get_server_port());
+		const result: StreamInfo = {
+			writer: socket,
+			reader: socket
+		};
+		return Promise.resolve(result);	 
+	};
    console.log('LPG Language Server start active!');
    languageClient = new LanguageClient('LPG Language Server', serverOptions, clientOptions);
-
-   // Register commands here to make it available even when the language client fails
-   context.subscriptions.push(commands.registerCommand(Commands.OPEN_SERVER_LOG, (column: ViewColumn) => openServerLogFile(workspacePath, column)));
-
-   context.subscriptions.push(commands.registerCommand(Commands.OPEN_CLIENT_LOG, (column: ViewColumn) => openClientLogFile(clientLogFile, column)));
-   context.subscriptions.push(commands.registerCommand(Commands.OPEN_LOGS, () => openLogs()));
-   context.subscriptions.push(commands.registerTextEditorCommand("lpg.tools.generateParser",
-   (textEditor: TextEditor, edit: TextEditorEdit) => {
-		regenerateParser(textEditor.document,progress,outputChannel);
-   }));
+  
    refactorAction.registerCommands(languageClient, context);
    analysisAction.registerCommands(languageClient,context);
 	languageClient.onReady().then(() => {
@@ -426,6 +379,86 @@ export function activate(context: vscode.ExtensionContext)
    languageClient.registerProposedFeatures();
    languageClient.start();
    console.log('LPG Language Server is now active!');
+ }
+ export async function start_server(context: vscode.ExtensionContext){
+	if(DEBUG){
+		lsPort = process.env['SERVER_PORT']
+	}
+	else{
+		lsPort = await get_free_port();
+		
+		let [cmd_string, exeHome] = get_server_path();
+		if(!cmd_string.length){
+			window.showErrorMessage("Can't find LPG server");
+		}
+		else{
+			
+			const parameters = [];
+			const spawnOptions = { cwd: exeHome };
+			parameters.push("--port")
+			parameters.push(lsPort)
+			parameters.push("--watchParentProcess")
+			server_process = child_process.spawn(cmd_string, parameters, spawnOptions);
+			
+			server_process.stderr.on("data", (data) => {
+				let text = data.toString() as string;
+				if (text.startsWith("Picked up _JAVA_OPTIONS:")) {
+					const endOfInfo = text.indexOf("\n");
+					if (endOfInfo === -1) {
+						text = "";
+					} else {
+						text = text.substr(endOfInfo + 1, text.length);
+					}
+				}
+				if (text.length > 0) {
+					outputChannel.append(text);
+				}
+			});
+			server_process.stdout.on("data",(data)=>{
+				let text = data.toString() as string;
+				outputChannel.append(text);
+			})
+			server_process.on("close", (code) => {
+				outputChannel.append("服务器关闭") // Treat this as non-grammar output (e.g. Java exception).
+			});
+
+		}
+	}
+
+	setTimeout(start_lpg, 1000,context);
+}
+export function activate(context: vscode.ExtensionContext)
+{
+	progress = new ProgressIndicator();
+    let storagePath = context.storagePath;
+	if (!storagePath) {
+		storagePath = getTempWorkspace();
+	}
+	clientLogFile = path.join(storagePath, 'client.log');
+    initializeLogFile(clientLogFile);
+    
+    const workspacePath = path.resolve(storagePath + '/LPG_ws');
+    const cleanWorkspaceExists = fs.existsSync(path.join(workspacePath, cleanWorkspaceFileName));
+    if (cleanWorkspaceExists) {
+        try {
+            deleteDirectory(workspacePath);
+        } catch (error) {
+            window.showErrorMessage(`Failed to delete ${workspacePath}: ${error}`);
+        }
+    }
+    outputChannel = new OutputInfoCollector(extensionName);
+   
+   // Register commands here to make it available even when the language client fails
+   context.subscriptions.push(commands.registerCommand(Commands.OPEN_SERVER_LOG, (column: ViewColumn) => openServerLogFile(workspacePath, column)));
+
+   context.subscriptions.push(commands.registerCommand(Commands.OPEN_CLIENT_LOG, (column: ViewColumn) => openClientLogFile(clientLogFile, column)));
+   context.subscriptions.push(commands.registerCommand(Commands.OPEN_LOGS, () => openLogs()));
+   context.subscriptions.push(commands.registerTextEditorCommand("lpg.tools.generateParser",
+   (textEditor: TextEditor, edit: TextEditorEdit) => {
+		regenerateParser(textEditor.document,progress,outputChannel);
+   }));
+   start_server(context);
+
 }
 
 export function deactivate(): Thenable<void> | undefined

@@ -23,6 +23,13 @@ const expandHomeDir = require("expand-home-dir");
     // Used internally only.
     baseDir?: string;
 
+
+    // Search template  path for the LPG tool.
+    use_define_template_directory?: string;
+
+    // Search inlcude  path for the LPG tool.
+    use_define_include_directory?: string;
+
     // Search template  path for the LPG tool.
     template_search_directory?: string;
 
@@ -76,8 +83,8 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
     const config = workspace.getConfiguration(Constant.LPG_GENERATION);
     const options: GenerationOptions = {
         baseDir: basePath,
-        template_search_directory: config.template_search_directory as string,
-        include_search_directory: config.include_search_directory as string,
+        template_search_directory: config.use_define_template_directory as string,
+        include_search_directory: config.use_define_include_directory as string,
         outputDir,
         language : config.language as string,
         package : config.package as string,    
@@ -88,6 +95,34 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         alternativeExe: config.alternativeExe as string,
         additionalParameters: config.additionalParameters as string,
     };
+    
+    if(options.language){
+        if(!options.include_search_directory){
+            let templates_dir = path.resolve(__dirname, '../templates/include');
+            if(options.language === 'java'){
+                options.include_search_directory = path.resolve(templates_dir, 'java');
+            }
+            else if(options.language === 'rt_cpp'){
+                options.include_search_directory = path.resolve(templates_dir, 'rt_cpp');
+            }
+            else if(options.language === 'csharp'){
+                options.include_search_directory = path.resolve(templates_dir, 'csharp');
+            }
+        }
+        if(!options.template_search_directory){
+            let templates_dir = path.resolve(__dirname, '../templates/templates');
+            if(options.language === 'java'){
+                options.template_search_directory = path.resolve(templates_dir, 'java');
+            }
+            else if(options.language === 'rt_cpp'){
+                options.template_search_directory = path.resolve(templates_dir, 'rt_cpp');
+            }
+            else if(options.language === 'csharp'){
+                options.template_search_directory = path.resolve(templates_dir, 'csharp');
+            }
+        }
+    }
+
     return options;
 }
     /**
@@ -176,25 +211,25 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
             return  ["",exeHome] ;
         }
     }
-    function get_lpg_generator_path(): string | undefined
+    function get_lpg_generator_path(): string[]
     {
-        let serverHome: string ;
+        let exeHome: string ;
         if (isWindows) {
-            serverHome = path.resolve(__dirname, '../lpg/win');
+            exeHome = path.resolve(__dirname, '../server/win');
         
         } else if(isLinux) {
-            serverHome =   path.resolve(__dirname, '../lpg/linux');
+            exeHome =   path.resolve(__dirname, '../server/linux');
         }
         else{
-            serverHome =  path.resolve(__dirname, '../lpg/mac');
+            exeHome =  path.resolve(__dirname, '../server/mac');
         }
         
         const launchersFound: Array<string> = glob.sync('**/lpg-v*', 
-        { cwd: serverHome });
+        { cwd: exeHome });
         if (launchersFound.length) {
-            return  (path.resolve(serverHome, launchersFound[0]));
+            return [(path.resolve(exeHome, launchersFound[0])),exeHome] ;
         } else {
-            return  null;
+            return  ["",exeHome] ;
         }
     }
     function generate(fileName : string,options: GenerationOptions): Promise<string[]> 
@@ -205,7 +240,14 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         if (options.alternativeExe) {
             cmd_string= (options.alternativeExe);
         } else {
-            cmd_string = get_lpg_generator_path();
+            let paths =get_lpg_generator_path();
+            cmd_string = paths[0];
+            if(!cmd_string.length){
+                reject("Can't find LPG generator");
+            }
+            else{
+                
+            }
         }
         if (! fs.pathExistsSync(cmd_string) ){
             reject(cmd_string + " didn't exist.")
