@@ -11,7 +11,7 @@
 ### Syntax Coloring
 
 * Syntax coloring for LPG grammars (.lpg .g and .gi files)
->![Syntax Coloring]( https://raw.githubusercontent.com/kuafuwang/LPG-VScode/master/doc/img/hover.png )
+>![Syntax Coloring]( doc/img/hover.png )
 
 * Comes with an own beautiful color theme, which not only includes all the [recommended groups](http://manual.macromates.com/en/language_grammars), but also some special rules for grammar elements that you won't find in other themes (e.g. alt labels and options). They are, immodestly, named `Complete Dark` and `Complete Light`.
 
@@ -33,10 +33,10 @@
 ### Graphical-visualizations
 
 * Call graph for LPG grammars 
->![Syntax Coloring]( https://raw.githubusercontent.com/kuafuwang/LPG-VScode/master/doc/img/call_graph.png )
+>![Syntax Coloring]( doc/img/call_graph.png )
 
 * Terminal and non-terminal  railroad graph for LPG grammars 
->![Syntax Coloring]( https://raw.githubusercontent.com/kuafuwang/LPG-VScode/master/doc/img/railroad.png )
+>![Syntax Coloring]( doc/img/railroad.png )
 
 * First set and follow set for LPG grammars 
   
@@ -68,7 +68,11 @@ Bug fixing and what feels appealing to hack on.
 
 Note: there are sometimes holes between release numbers, which are caused by the need of re-releasing a version due to release problems. The do not change anything in the extension code.
 
-### 0.0.1
+### 0.0.4
+* fixed lpg language server bugs.
+### 0.0.3
+* fixed lpg generator bugs.
+### 0.0.2
 
 * full setup of the project
 * added most of the required settings etc.

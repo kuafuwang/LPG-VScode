@@ -19,7 +19,7 @@
 		"type": "git",
 		"url": "https://github.com/kuafuwang/LPG-VScode"
 	},
-	"version": "0.0.2",
+	"version": "0.0.4",
 	"engines": {
 		"vscode": "^1.48.0"
 	},
