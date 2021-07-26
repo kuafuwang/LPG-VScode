@@ -1,11 +1,10 @@
 'use strict';
 
-import { existsSync } from 'fs';
 import * as path from 'path';
-import { commands, ExtensionContext, Position, QuickPickItem, TextDocument, TextEditor, TextEditorEdit, Uri, window, workspace } from 'vscode';
-import { FormattingOptions,  WorkspaceEdit, CreateFile, RenameFile, DeleteFile, TextDocumentEdit, CodeActionParams, SymbolInformation, TextDocumentPositionParams, TextDocumentIdentifier } from 'vscode-languageclient';
-import { Commands, Commands as javaCommands } from './commands';
-import {   CallGraphRequest, FirstSet_AllRules_Request, FirstSet_SingleRule_Request, FollowSet_AllRules_Request, FollowSet_SingleRule_Request, GetInlineNonTerminalRefactorRequest, GetMakeEmptyRefactorRequest, GetMakeLeftRecursiveRefactorRequest, GetNonEmptyRefactorRequest, RefactorWorkspaceEdit, RRD_AllRules_Request, RRD_SingleRule_Request} from './protocol';
+import { commands, ExtensionContext, TextEditor, TextEditorEdit, window } from 'vscode';
+import { TextDocumentIdentifier } from 'vscode-languageclient';
+import { Commands } from './commands';
+import {   CallGraphRequest, FirstSet_AllRules_Request, FirstSet_SingleRule_Request, FollowSet_AllRules_Request, FollowSet_SingleRule_Request, RRD_AllRules_Request, RRD_SingleRule_Request} from './protocol';
 import { LanguageClient } from 'vscode-languageclient/node';
 import { getTextDocumentPositionParams } from './Utils';
 import { LpgRailroadDiagramProvider } from './RailroadDiagramProvider';

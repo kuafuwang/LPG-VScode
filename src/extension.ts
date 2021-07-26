@@ -5,8 +5,7 @@ import * as os from 'os'
 import * as fs from 'fs';
 import glob = require('glob');
 import {     
-       workspace, Uri,   
-    Position, window,commands, ViewColumn, OutputChannel,
+       workspace, Position, window,commands, ViewColumn, OutputChannel,
 	 Selection } from "vscode";
 
 import {  
@@ -16,7 +15,6 @@ import {
 		    MessageType,
 			WorkspaceEdit,
 			Command,
-			TextDocumentIdentifier,
 			DidChangeConfigurationNotification,
 		
 		  } from 'vscode-languageclient';
@@ -26,15 +24,15 @@ import { LanguageClient, ServerOptions, StreamInfo } from 'vscode-languageclient
 import { logger, initializeLogFile } from './log';
 import * as child_process from "child_process";
 import { Commands } from './commands';
-import { deleteDirectory, getTextDocumentPositionParams, get_free_port, isString } from './Utils';
-import { ActionableMessage, ActionableNotification, ProgressReport, ProgressReportNotification, RRD_AllRules_Request } from './protocol';
+import { deleteDirectory, get_free_port, isString } from './Utils';
+import { ActionableMessage, ActionableNotification, ProgressReport, ProgressReportNotification } from './protocol';
 import { serverTasks } from './serverTasks';
 import * as refactorAction from './refactorAction';
 import { TextEditor } from 'vscode';
 import * as analysisAction from  './Analysis';
 import { ProgressIndicator } from './ProgressIndicator';
 import { TextEditorEdit } from 'vscode';
-import { GetGenerationOptions, get_server_path, regenerateParser } from './GrammarGenerator';
+import { GetGenerationOptions, GetGenerationSettingOptions, get_server_path, regenerateParser } from './GrammarGenerator';
 
 
 
@@ -45,44 +43,6 @@ const extensionName = 'Language Support for LPG';
 let clientLogFile : string;
 let progress: ProgressIndicator;
 let outputChannel : OutputInfoCollector;
-class FileStatus
-{
-    private statuses = new Map<string, any>();
-    private readonly statusBarItem =
-        vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);
-        
-    onFileUpdated(fileStatus: any)
-    {
-        const filePath = vscode.Uri.parse(fileStatus.uri);
-        this.statuses.set(filePath.fsPath, fileStatus);
-        this.updateStatus();
-    }
-
-    updateStatus()
-    {
-     
-      //  const path = vscode.window.activeTextEditor.document.fileName;
-      //  const status = this.statuses.get(path);
-     //   if (!status)
-     //   {
-      //      this.statusBarItem.hide();
-       //     return;
-      //  }
-       // this.statusBarItem.text = `antlr: ` + status.state;
-       // this.statusBarItem.show();
-    }
-
-    clear()
-    {
-        this.statuses.clear();
-        this.statusBarItem.hide();
-    }
-
-    dispose()
-    {
-        this.statusBarItem.dispose();
-    }
-}
 
 function getTempWorkspace() {
 	return path.resolve(os.tmpdir(), 'vscodesws_' + makeRandomHexString(5));
@@ -316,7 +276,7 @@ function  start_lpg(context: vscode.ExtensionContext) {
 				didChangeConfiguration: () => {
 					getClient().sendNotification(DidChangeConfigurationNotification.type, {
 						settings: {
-							options: GetGenerationOptions(undefined,undefined)
+							options: GetGenerationSettingOptions()
 						}
 					});
 				}

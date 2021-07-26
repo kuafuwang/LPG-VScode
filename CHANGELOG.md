@@ -8,6 +8,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Initial release
 
+### 0.0.5
+* Support action list after a rule.
+* Fixed lpg generator bugs.
+  
 ### 0.0.4
 * fixed lpg language server bugs.
 ### 0.0.3

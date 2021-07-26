@@ -10,6 +10,7 @@ import { OutputInfoCollector } from "./extension";
 import { Constant } from "./commands";
 import { isLinux, isWindows } from "./Utils";
 import glob = require("glob");
+import { settings } from "cluster";
 
 
 const expandHomeDir = require("expand-home-dir");
@@ -42,8 +43,8 @@ const expandHomeDir = require("expand-home-dir");
     // Package or namespace name for generated files (default: none).
     package?: string;
 
-    // The target language for the generated files. (default: what's given in the grammar or Java).
-    language?: string;
+    // The target template for the generated files. (default: what's given in the grammar or Java).
+    built_in_template?: string;
 
     // Generate visitor files if set (default: false).
     visitor?: string;
@@ -56,6 +57,28 @@ const expandHomeDir = require("expand-home-dir");
     alternativeExe?: string;
 
 
+
+    // Any additional parameter you want to send to LPG for generation (e.g. "-lalr=3").
+    additionalParameters?: string;
+}
+export interface GenerationSettingOptions {
+ 
+    // Search template  path for the LPG tool.
+    template_search_directory?: string;
+
+    // Search inlcude  path for the LPG tool.
+    include_search_directory?: string;
+
+    // Package or namespace name for generated files (default: none).
+    package?: string;
+
+
+    // Generate visitor files if set (default: false).
+    visitor?: string;
+
+    trace?: string;
+    quiet?: boolean;
+    verbose?: boolean;
 
     // Any additional parameter you want to send to LPG for generation (e.g. "-lalr=3").
     additionalParameters?: string;
@@ -77,7 +100,21 @@ async function fromEnv(name: string): Promise<string[]> {
     }
     return ret;
 }
-
+export function GetGenerationSettingOptions():GenerationSettingOptions{
+    let option = GetGenerationOptions(undefined,undefined);
+    let settings : GenerationSettingOptions={
+        template_search_directory: option.template_search_directory,
+        include_search_directory :option.include_search_directory,
+        package: option.package,
+        visitor: option.visitor,
+        quiet : option.quiet,
+        trace : option.trace,
+        verbose  : option.verbose,
+        additionalParameters : option.additionalParameters
+    };
+   
+    return settings;
+}
 export function GetGenerationOptions(basePath: string | undefined, outputDir : string | undefined):GenerationOptions
 {
     const config = workspace.getConfiguration(Constant.LPG_GENERATION);
@@ -86,7 +123,7 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         template_search_directory: config.use_define_template_directory as string,
         include_search_directory: config.use_define_include_directory as string,
         outputDir,
-        language : config.language as string,
+        built_in_template : config.built_in_template as string,
         package : config.package as string,    
         visitor : config.visitor as string,
         trace: config.trace as string,
@@ -96,29 +133,44 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         additionalParameters: config.additionalParameters as string,
     };
     
-    if(options.language){
+    if(options.built_in_template){
         if(!options.include_search_directory){
+            options.include_search_directory = "";
+        }
+        else{
+            options.include_search_directory +=";";
+        }
+        {
             let templates_dir = path.resolve(__dirname, '../templates/include');
-            if(options.language === 'java'){
-                options.include_search_directory = path.resolve(templates_dir, 'java');
+            if(options.built_in_template === 'java'){
+                options.include_search_directory += path.resolve(templates_dir, 'java');
             }
-            else if(options.language === 'rt_cpp'){
-                options.include_search_directory = path.resolve(templates_dir, 'rt_cpp');
+            else if(options.built_in_template === 'rt_cpp'){
+                options.include_search_directory += path.resolve(templates_dir, 'rt_cpp');
             }
-            else if(options.language === 'csharp'){
-                options.include_search_directory = path.resolve(templates_dir, 'csharp');
+            else if(options.built_in_template === 'csharp'){
+                options.include_search_directory += path.resolve(templates_dir, 'csharp');
             }
         }
+
+        
         if(!options.template_search_directory){
+            options.template_search_directory="";
+        }
+        else{
+            options.template_search_directory +=";";
+        }
+
+        {
             let templates_dir = path.resolve(__dirname, '../templates/templates');
-            if(options.language === 'java'){
-                options.template_search_directory = path.resolve(templates_dir, 'java');
+            if(options.built_in_template === 'java'){
+                options.template_search_directory += path.resolve(templates_dir, 'java');
             }
-            else if(options.language === 'rt_cpp'){
-                options.template_search_directory = path.resolve(templates_dir, 'rt_cpp');
+            else if(options.built_in_template === 'rt_cpp'){
+                options.template_search_directory += path.resolve(templates_dir, 'rt_cpp');
             }
-            else if(options.language === 'csharp'){
-                options.template_search_directory = path.resolve(templates_dir, 'csharp');
+            else if(options.built_in_template === 'csharp'){
+                options.template_search_directory += path.resolve(templates_dir, 'csharp');
             }
         }
     }
@@ -175,7 +227,7 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
       
         const options= GetGenerationOptions(basePath,outputDir);
         
-        const result = generate(grammarFileName, options);
+        const result = generate(grammarFileName, options,outputChannel);
         result.then((out_strings: string[]) => {
             for (const str of out_strings) {
                 outputChannel.appendLine(str)   
@@ -232,7 +284,7 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
             return  ["",exeHome] ;
         }
     }
-    function generate(fileName : string,options: GenerationOptions): Promise<string[]> 
+    function generate(fileName : string,options: GenerationOptions,outputChannel:OutputInfoCollector): Promise<string[]> 
  {
     return new Promise<string[]>((resolve, reject) => {
        
@@ -254,9 +306,7 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
             return
         }
         const parameters = [];
-        if (options.language) {
-            parameters.push("-programming_language=" + options.language);
-        }
+        
         if (options.quiet) {
             parameters.push("-quiet");
         }
@@ -298,10 +348,9 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         }
 
         
-      
         parameters.push(fileName);
-
         const spawnOptions = { cwd: options.outputDir ? options.outputDir : undefined };
+        outputChannel.appendLine(parameters.join(" "))
         const lpg_process = child_process.spawn(cmd_string, parameters, spawnOptions);
 
         const outputList: string[] = [];

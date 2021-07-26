@@ -19,7 +19,7 @@
 		"type": "git",
 		"url": "https://github.com/kuafuwang/LPG-VScode"
 	},
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"engines": {
 		"vscode": "^1.48.0"
 	},
@@ -210,8 +210,7 @@
 					"type": "object",
 					"default": {
 						"mode": "internal",
-						"visitor": "default",
-						"language" :"java"
+						"visitor": "default"
 					},
 					"description": "Settings related to parser generation",
 					"properties": {
@@ -246,21 +245,14 @@
 							"default": "",
 							"description": "Location to template grammars from (relative to a grammar or absolute path)"
 						},
-						"language": {
+						"built_in_template": {
 							"type": "string",
 							"default": "java",
-							"description": "Specifies the target language for the generated code, overriding what is specified in the grammar",
+							"description": "Specifies the built in  target template for the generated code",
 							"enum": [
-								"xml",
-								"c",
-								"c++",
 								"rt_cpp",
 								"csharp",
-								"java",
-								"plx",
-								"plx",
-								"plxasm",
-								"ml"
+								"java"
 							]
 						},
 						"visitor": {
