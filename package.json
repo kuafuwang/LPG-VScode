@@ -19,7 +19,7 @@
 		"type": "git",
 		"url": "https://github.com/kuafuwang/LPG-VScode"
 	},
-	"version": "0.0.5",
+	"version": "0.0.8",
 	"engines": {
 		"vscode": "^1.48.0"
 	},
@@ -206,7 +206,7 @@
 					"default": "",
 					"description": "Default export target folder for call graphs"
 				},
-				"lpg.generation": {
+				"lpg.generation.setting": {
 					"type": "object",
 					"default": {
 						"mode": "internal",
@@ -252,7 +252,8 @@
 							"enum": [
 								"rt_cpp",
 								"csharp",
-								"java"
+								"java",
+								"typescript"
 							]
 						},
 						"visitor": {

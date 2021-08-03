@@ -151,6 +151,9 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
             else if(options.built_in_template === 'csharp'){
                 options.include_search_directory += path.resolve(templates_dir, 'csharp');
             }
+            else if(options.built_in_template === 'typescript'){
+                options.include_search_directory += path.resolve(templates_dir, 'typescript');
+            }
         }
 
         
@@ -172,6 +175,10 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
             else if(options.built_in_template === 'csharp'){
                 options.template_search_directory += path.resolve(templates_dir, 'csharp');
             }
+            else if(options.built_in_template === 'typescript'){
+                options.template_search_directory += path.resolve(templates_dir, 'typescript');
+            }
+            
         }
     }
 
