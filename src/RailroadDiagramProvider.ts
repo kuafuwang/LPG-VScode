@@ -14,7 +14,7 @@ import { RailRoadScriptInfo } from "./protocol";
 
 export class LpgRailroadDiagramProvider extends WebviewProvider {
 
-    symbols : Array<RailRoadScriptInfo> ;
+    symbols : Array<RailRoadScriptInfo> = [];
     public generateContent(webView: vscode.Webview, editor: vscode.TextEditor, options: WebviewShowOptions): string {
         const caret = editor.selection.active;
 

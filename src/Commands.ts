@@ -1,7 +1,7 @@
 'use strict';
 
 export namespace Constant{
-    export  const  LPG_GENERATION = "lpg.generation";
+    export  const  LPG_GENERATION = "lpg.generation.setting";
 }
 /**
  * Commonly used commands

@@ -12,7 +12,7 @@ import { Utils } from "./Utils";
 import { TextEditor, Uri, Webview } from "vscode";
 import { CallGraphNodeInfo } from "./protocol";
 export class LpgCallGraphProvider extends WebviewProvider {
-    graph :  Array<CallGraphNodeInfo> ;
+    graph :  Array<CallGraphNodeInfo> =[];
     
     public  generateContent(webView: Webview, source: TextEditor | Uri, options: WebviewShowOptions): string
     {

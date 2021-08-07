@@ -12,6 +12,12 @@ import { LpgCallGraphProvider } from './CallGraphProvider';
 export function registerCommands(languageClient: LanguageClient, context: ExtensionContext) {
     registerAnalysisCommand(languageClient, context);
 }
+function getUrl() : string {
+   let uri = window.activeTextEditor?.document.uri.toString();
+	if(uri)
+	return uri;
+	return "";
+}
 function registerAnalysisCommand(languageClient: LanguageClient, context: ExtensionContext): void {
       // The call graph command.
    const callGraphProvider = new LpgCallGraphProvider(languageClient,context);
@@ -53,7 +59,7 @@ function registerAnalysisCommand(languageClient: LanguageClient, context: Extens
    context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_RRD_ALL_RULE,
    async  (textEditor: TextEditor, edit: TextEditorEdit) => {
 	const textDocument : TextDocumentIdentifier = {
-		uri : window.activeTextEditor.document.uri.toString()
+		uri : getUrl()
 	};
 	const  result   = await   languageClient.sendRequest(RRD_AllRules_Request.type, textDocument );
     if (result.errorMessage) {
@@ -94,7 +100,7 @@ function registerAnalysisCommand(languageClient: LanguageClient, context: Extens
    context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_FIRST_SET_ALL_RULE,
    async  (textEditor: TextEditor, edit: TextEditorEdit) => {
 	const textDocument : TextDocumentIdentifier = {
-		uri : window.activeTextEditor.document.uri.toString()
+		uri : getUrl()
 	};
 	const  result   = await   languageClient.sendRequest(FirstSet_AllRules_Request.type, textDocument );
     if (result.errorMessage) {
@@ -130,12 +136,12 @@ function registerAnalysisCommand(languageClient: LanguageClient, context: Extens
 		   });
 	   }),
    );
-
+   
  
    context.subscriptions.push(commands.registerTextEditorCommand(Commands.LPG_FOLLOW_SET_ALL_RULE,
    async  (textEditor: TextEditor, edit: TextEditorEdit) => {
 	const textDocument : TextDocumentIdentifier = {
-		uri : window.activeTextEditor.document.uri.toString()
+		uri : getUrl()
 	};
 	const  result   = await   languageClient.sendRequest(FollowSet_AllRules_Request.type, textDocument );
     if (result.errorMessage) {

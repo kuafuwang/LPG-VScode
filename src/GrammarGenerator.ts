@@ -43,7 +43,10 @@ const expandHomeDir = require("expand-home-dir");
     // Package or namespace name for generated files (default: none).
     package?: string;
 
-    // The target template for the generated files. (default: what's given in the grammar or Java).
+    // The target language for the generated files. (default: what's given in the grammar or Java).
+    language?: string;
+
+    // The target template for the generated files. (default: java).
     built_in_template?: string;
 
     // Generate visitor files if set (default: false).
@@ -72,6 +75,8 @@ export interface GenerationSettingOptions {
     // Package or namespace name for generated files (default: none).
     package?: string;
 
+    // The target language for the generated files. (default: what's given in the grammar or Java).
+    language?: string;
 
     // Generate visitor files if set (default: false).
     visitor?: string;
@@ -106,6 +111,7 @@ export function GetGenerationSettingOptions():GenerationSettingOptions{
         template_search_directory: option.template_search_directory,
         include_search_directory :option.include_search_directory,
         package: option.package,
+        language : option.language,
         visitor: option.visitor,
         quiet : option.quiet,
         trace : option.trace,
@@ -124,6 +130,7 @@ export function GetGenerationOptions(basePath: string | undefined, outputDir : s
         include_search_directory: config.use_define_include_directory as string,
         outputDir,
         built_in_template : config.built_in_template as string,
+        language : config.language as string,   
         package : config.package as string,    
         visitor : config.visitor as string,
         trace: config.trace as string,

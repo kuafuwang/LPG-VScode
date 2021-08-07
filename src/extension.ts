@@ -243,10 +243,12 @@ function getClient(): LanguageClient {
 const DEBUG =  process.env['DEBUG_LPG_VSCODE'] === 'true';
 //const DEBUG =  true;
 let server_process : child_process.ChildProcessWithoutNullStreams ;
-let lsPort : string;
+let lsPort : string | undefined;
 
 function get_server_port():string{
-	return lsPort;
+	if(lsPort)
+		return lsPort;
+	return "";
 }
 function  start_lpg(context: vscode.ExtensionContext) { 
 

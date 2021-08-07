@@ -19,7 +19,7 @@
 		"type": "git",
 		"url": "https://github.com/kuafuwang/LPG-VScode"
 	},
-	"version": "0.0.8",
+	"version": "0.0.9",
 	"engines": {
 		"vscode": "^1.48.0"
 	},
@@ -230,6 +230,24 @@
                             "description": "Package/namespace for generated code"
 							
                         },
+						"language": {
+                            "type": "string",
+                            "default": "java",
+                            "description": "Specifies the target language for the Lsp  server.",
+							"enum": [
+								"c",
+								"c++",
+								"rt_cpp",
+								"csharp",
+								"java",
+								"typescript",
+								"ml",
+								"plx",
+								"plxasm",
+								"xml",
+								"undefined"
+							]
+						},
 						"outputDir": {
 							"type": "string",
 							"default": "",
