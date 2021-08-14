@@ -2,6 +2,7 @@
 
 
 # LPG-VScode README
+# this project had move to https://github.com/The-LALR-parser-generator-LPG/LPG-VScode.
 
 # lpg-vscode
 **The** extension for LPG support in Visual Studio code.
